@@ -1,5 +1,5 @@
 {
-  "name": "Claude Code Environment with Playwright MCP",
+  "name": "Claude Code Environment",
   "image": "mcr.microsoft.com/devcontainers/python:3.13",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
@@ -10,8 +10,7 @@
     }
   },
 
-  "postCreateCommand": "bash .devcontainer/post-create-simple.sh",
-
+  "postCreateCommand": "npm install -g @anthropic-ai/claude-code",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -41,10 +40,7 @@
         "wayou.vscode-todo-highlight",
 
         // UI/Icons
-        "pkief.material-icon-theme",
-
-        // Playwright (for web testing)
-        "ms-playwright.playwright"
+        "pkief.material-icon-theme"
       ],
       "settings": {
         "editor.formatOnSave": true,
@@ -55,20 +51,5 @@
       }
     }
   },
-
-  "remoteUser": "vscode",
-
-  // Container runtime configuration for Playwright
-  "runArgs": [
-    "--shm-size=2gb", // Prevent Chrome crashes with shared memory
-    "--cap-add=SYS_ADMIN" // Required for Chrome sandbox (or use --no-sandbox)
-  ],
-
-  // Environment variables
-  "containerEnv": {
-    "DISPLAY": ":99" // Virtual display for headed browser mode
-  },
-
-  // Forward common web development ports
-  "forwardPorts": [3000, 3001, 4000, 5173, 5174, 8080, 8081, 9000]
+  "remoteUser": "vscode"
 }
