@@ -9,7 +9,7 @@ A comprehensive, security-hardened VS Code DevContainer configuration for AI/ML 
 
 ---
 
-## =Ë Table of Contents
+## =ï¿½ Table of Contents
 
 - [Overview](#-overview)
 - [Features](#-features)
@@ -26,15 +26,15 @@ A comprehensive, security-hardened VS Code DevContainer configuration for AI/ML 
 
 ---
 
-## <¯ Overview
+## <ï¿½ Overview
 
 This repository provides a **production-ready DevContainer environment** designed for:
 
 - > **AI/ML Development** - Python 3.12 with numpy, pandas, and data science tools
 - =3 **Container Testing** - Docker-outside-of-Docker (DooD) for building and testing Docker images
-- <­ **Browser Automation** - Playwright with Chromium for web testing and UI optimization
+- <ï¿½ **Browser Automation** - Playwright with Chromium for web testing and UI optimization
 - = **Security First** - Hardened configuration with pinned dependencies and minimal privileges
-- =Ú **Comprehensive Documentation** - Extensively commented configuration files for learning
+- =ï¿½ **Comprehensive Documentation** - Extensively commented configuration files for learning
 
 ### Why This DevContainer?
 
@@ -60,32 +60,32 @@ This repository provides a **production-ready DevContainer environment** designe
 
 - > **Anthropic Claude Code** - AI coding assistant
 - = **Python** (with Pylance, debugpy, black formatter)
-- <¨ **Prettier & ESLint** - Code formatting and linting
+- <ï¿½ **Prettier & ESLint** - Code formatting and linting
 - <3 **GitLens** - Advanced Git visualization
 - =3 **Docker** - Container management
-- <­ **Playwright** - Browser automation and testing
+- <ï¿½ **Playwright** - Browser automation and testing
 - ( **And 10+ more quality-of-life extensions**
 
 ### Playwright Web UI Optimizer
 
 Pre-configured project with ready-to-use tools:
-- =ø Responsive screenshot capture
-- <¨ Color palette analysis
+- =ï¿½ Responsive screenshot capture
+- <ï¿½ Color palette analysis
 -  Accessibility checking
-- ¡ Performance metrics
+- ï¿½ Performance metrics
 - = Before/after visual comparisons
 
 ### Security Features
 
 - = **No Privileged Containers** - Removed `SYS_ADMIN` and `ipc=host`
-- =Ì **Pinned Package Versions** - Protected against supply chain attacks
-- =á **Minimal Attack Surface** - Only necessary packages installed
+- =ï¿½ **Pinned Package Versions** - Protected against supply chain attacks
+- =ï¿½ **Minimal Attack Surface** - Only necessary packages installed
 - =d **Non-root User** - Runs as `vscode` user, not root
 - = **Fully Auditable** - All dependencies version-controlled
 
 ---
 
-## =€ Quick Start
+## =ï¿½ Quick Start
 
 ### Prerequisites
 
@@ -144,7 +144,7 @@ Pre-configured project with ready-to-use tools:
 
 ---
 
-## =æ What's Included
+## =ï¿½ What's Included
 
 ### Base Environment
 
@@ -158,14 +158,14 @@ Pre-configured project with ready-to-use tools:
 ### Python Packages (Pinned Versions)
 
 ```python
-playwright==1.48.1        # Browser automation
+playwright==1.55.0        # Browser automation
 pytest==7.4.3             # Testing framework
-pytest-playwright==0.4.3  # Pytest + Playwright integration
+pytest-playwright==0.7.1  # Pytest + Playwright integration
 black==23.12.1            # Code formatter
 pylint==3.0.3             # Code linter
 ipython==8.18.1           # Interactive shell
 numpy==1.26.2             # Numerical computing
-pandas==2.1.4             # Data manipulation
+pandas==2.3.3             # Data manipulation
 ```
 
 ### System Libraries
@@ -207,23 +207,23 @@ This DevContainer has been **security hardened** with the following measures:
 - `ipc=host` = Breaks container isolation, exposes host memory
 - Neither is required for Playwright or Docker functionality
 
-### =Ì Supply Chain Protection
+### =ï¿½ Supply Chain Protection
 
 All package versions are pinned to prevent:
--   Malicious package updates
--   Typosquatting attacks
--   Compromised maintainer accounts
--   Unexpected breaking changes
+- ï¿½ Malicious package updates
+- ï¿½ Typosquatting attacks
+- ï¿½ Compromised maintainer accounts
+- ï¿½ Unexpected breaking changes
 
 **Example:**
 ```json
 "dependencies": {
-  "playwright": "1.48.1",  // Exact version, no ^ or ~
-  "@playwright/test": "1.48.1"
+  "playwright": "1.56.1",  // Exact version, no ^ or ~
+  "@playwright/test": "1.56.1"
 }
 ```
 
-### =á Additional Security Measures
+### =ï¿½ Additional Security Measures
 
 -  Non-root user (`vscode`)
 -  Minimal package installation
@@ -238,7 +238,7 @@ All package versions are pinned to prevent:
 
 ---
 
-## =» Usage Examples
+## =ï¿½ Usage Examples
 
 ### Example 1: Python Data Science
 
@@ -324,7 +324,7 @@ gh repo clone username/repo
 
 ---
 
-## =Á Project Structure
+## =ï¿½ Project Structure
 
 ```
 .
@@ -344,7 +344,7 @@ gh repo clone username/repo
 
 ---
 
-## ™ Configuration
+## ï¿½ Configuration
 
 ### Customizing the Environment
 
@@ -354,7 +354,7 @@ Edit `.devcontainer/post-create.sh` (line 201):
 
 ```bash
 pip install \
-    playwright==1.48.1 \
+    playwright==1.55.0 \
     pytest==7.4.3 \
     # Add your packages here
     scikit-learn==1.3.2 \
@@ -409,7 +409,7 @@ docker info  # Should show server information
 - Ensure Docker Desktop is running
 - Restart Docker Desktop
 - Check disk space: `df -h`
-- Check Docker resources in Settings ’ Resources
+- Check Docker resources in Settings ï¿½ Resources
 
 ### Playwright Browser Not Found
 
@@ -428,7 +428,7 @@ docker ps  # Should show containers
 ```
 
 **Solutions:**
-- Rebuild container: `Cmd+Shift+P` ’ "Rebuild Container"
+- Rebuild container: `Cmd+Shift+P` ï¿½ "Rebuild Container"
 - Check devcontainer.json has docker-outside-of-docker feature
 - Verify /var/run/docker.sock exists on host
 
@@ -476,16 +476,16 @@ du -sh node_modules             # Node packages
 
 ---
 
-## =„ Performance Tips
+## =ï¿½ Performance Tips
 
 ### macOS/Windows Performance
 
 1. **Use WSL2 on Windows**
-   - Docker Desktop ’ Settings ’ General ’ Use WSL2
+   - Docker Desktop ï¿½ Settings ï¿½ General ï¿½ Use WSL2
    - 10x faster than Hyper-V
 
 2. **Increase Docker Resources**
-   - Docker Desktop ’ Settings ’ Resources
+   - Docker Desktop ï¿½ Settings ï¿½ Resources
    - CPUs: 4-8 cores
    - Memory: 8-16GB
    - Disk: 50GB+
@@ -519,7 +519,7 @@ npm cache clean --force
 
 ---
 
-## =Ö Documentation
+## =ï¿½ Documentation
 
 ### Inline Documentation
 
@@ -570,7 +570,7 @@ Found a bug? Have a suggestion?
 
 ---
 
-## =Ý Changelog
+## =ï¿½ Changelog
 
 ### Version 2.0 (Current)
 
@@ -609,7 +609,7 @@ Found a bug? Have a suggestion?
 
 ---
 
-## =Ä License
+## =ï¿½ License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -617,15 +617,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## = Quick Links
 
-- =Ú [DevContainers Documentation](https://containers.dev/)
-- <­ [Playwright Documentation](https://playwright.dev/)
+- =ï¿½ [DevContainers Documentation](https://containers.dev/)
+- <ï¿½ [Playwright Documentation](https://playwright.dev/)
 - =3 [Docker Documentation](https://docs.docker.com/)
 - > [Claude Code](https://claude.com/claude-code)
 - = [GitHub CLI](https://cli.github.com/)
 
 ---
 
-## =¬ Support
+## =ï¿½ Support
 
 Need help? Here's how to get support:
 
@@ -656,6 +656,6 @@ Need help? Here's how to get support:
 
 Made with d for developers who value security, documentation, and productivity.
 
-[Report Bug](https://github.com/YOUR_USERNAME/YOUR_REPO/issues) · [Request Feature](https://github.com/YOUR_USERNAME/YOUR_REPO/issues) · [Documentation](https://github.com/YOUR_USERNAME/YOUR_REPO/wiki)
+[Report Bug](https://github.com/YOUR_USERNAME/YOUR_REPO/issues) ï¿½ [Request Feature](https://github.com/YOUR_USERNAME/YOUR_REPO/issues) ï¿½ [Documentation](https://github.com/YOUR_USERNAME/YOUR_REPO/wiki)
 
 </div>

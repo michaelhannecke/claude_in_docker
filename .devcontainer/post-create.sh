@@ -144,7 +144,7 @@ sudo apt-get install -y --no-install-recommends \
 # - Available globally after installation: run with 'claude-code' command
 #
 # SECURITY: Version Pinning
-# - @1.0.0: Specific version pinned to prevent supply chain attacks
+# - @2.0.32: Specific version pinned to prevent supply chain attacks
 # - Without version pinning, 'npm install' would get latest version
 # - Latest version could be compromised or contain breaking changes
 # - IMPORTANT: Update this version intentionally after testing
@@ -172,14 +172,14 @@ npm install -g @anthropic-ai/claude-code@2.0.32
 # - Older pip versions may have installation issues
 #
 # SECURITY: All Versions Pinned
-# - playwright==1.48.0: Browser automation framework
+# - playwright==1.55.0: Browser automation framework
 # - pytest==7.4.3: Testing framework
-# - pytest-playwright==0.4.3: Pytest plugin for Playwright
+# - pytest-playwright==0.7.1: Pytest plugin for Playwright
 # - black==23.12.1: Code formatter (PEP 8 compliant)
 # - pylint==3.0.3: Code linter (style and error checking)
 # - ipython==8.18.1: Interactive Python shell (better REPL)
 # - numpy==1.26.2: Numerical computing library
-# - pandas==2.1.4: Data manipulation and analysis
+# - pandas==2.3.3: Data manipulation and analysis
 #
 # WHY PIN VERSIONS?
 # 1. Supply Chain Security: Prevent malicious updates from auto-installing
@@ -307,7 +307,8 @@ cd "$PROJECT_DIR"
 # - "install-browsers": Manually install Chromium if needed
 #
 # VERSION PINNING:
-# - "playwright": "1.48.1" (no ^ caret, exact version only)
+# - "playwright": "1.56.1" (no ^ caret, exact version only)
+# - "@playwright/test": "1.56.1" (no ^ caret, exact version only)
 # - Prevents automatic minor/patch updates
 # - Ensures reproducible builds across team
 #
