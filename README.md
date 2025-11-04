@@ -30,7 +30,7 @@ A comprehensive, security-hardened VS Code DevContainer configuration for AI/ML 
 
 This repository provides a **production-ready DevContainer environment** designed for:
 
-- > **AI/ML Development** - Python 3.12 with numpy, pandas, and data science tools
+- >  **AI/ML Development** - Python 3.12 with numpy, pandas, and data science tools
 - =3 **Container Testing** - Docker-outside-of-Docker (DooD) for building and testing Docker images
 - <� **Browser Automation** - Playwright with Chromium for web testing and UI optimization
 - = **Security First** - Hardened configuration with pinned dependencies and minimal privileges
@@ -58,8 +58,9 @@ This repository provides a **production-ready DevContainer environment** designe
 
 ### Pre-configured VS Code Extensions
 
-- > **Anthropic Claude Code** - AI coding assistant
-- = **Python** (with Pylance, debugpy, black formatter)
+- >  **Anthropic Claude Code** - AI coding assistant
+- =
+  **Python** (with Pylance, debugpy, black formatter)
 - <� **Prettier & ESLint** - Code formatting and linting
 - <3 **GitLens** - Advanced Git visualization
 - =3 **Docker** - Container management
@@ -69,6 +70,7 @@ This repository provides a **production-ready DevContainer environment** designe
 ### Playwright Web UI Optimizer
 
 Pre-configured project with ready-to-use tools:
+
 - =� Responsive screenshot capture
 - <� Color palette analysis
 -  Accessibility checking
@@ -81,7 +83,8 @@ Pre-configured project with ready-to-use tools:
 - =� **Pinned Package Versions** - Protected against supply chain attacks
 - =� **Minimal Attack Surface** - Only necessary packages installed
 - =d **Non-root User** - Runs as `vscode` user, not root
-- = **Fully Auditable** - All dependencies version-controlled
+- =
+  **Fully Auditable** - All dependencies version-controlled
 
 ---
 
@@ -90,11 +93,13 @@ Pre-configured project with ready-to-use tools:
 ### Prerequisites
 
 1. **Docker Desktop** installed and running
+
    - [Install Docker Desktop](https://www.docker.com/products/docker-desktop/)
    - Minimum: 2 CPUs, 4GB RAM, 32GB disk space
    - Recommended: 4 CPUs, 8GB RAM, 50GB disk space
 
 2. **Visual Studio Code** with Dev Containers extension
+
    - [Install VS Code](https://code.visualstudio.com/)
    - Install extension: [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
@@ -104,29 +109,34 @@ Pre-configured project with ready-to-use tools:
 ### Setup Steps
 
 1. **Clone this repository**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
    cd YOUR_REPO
    ```
 
 2. **Open in VS Code**
+
    ```bash
    code .
    ```
 
 3. **Reopen in Container**
+
    - VS Code will detect the devcontainer configuration
    - Click "Reopen in Container" when prompted
    - **OR** press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
    - Select: "Dev Containers: Reopen in Container"
 
 4. **Wait for Setup** (5-10 minutes first time)
+
    - Container builds and installs all dependencies
    - Playwright browsers download (~150MB)
    - Progress shown in VS Code terminal
    - Subsequent starts are instant (cached)
 
 5. **Verify Installation**
+
    ```bash
    # Check Python
    python --version  # Should show Python 3.12.x
@@ -148,12 +158,12 @@ Pre-configured project with ready-to-use tools:
 
 ### Base Environment
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Python | 3.12 | Core programming language |
+| Tool    | Version  | Purpose                           |
+| ------- | -------- | --------------------------------- |
+| Python  | 3.12     | Core programming language         |
 | Node.js | 22 (LTS) | JavaScript runtime for Playwright |
-| pip | Latest | Python package manager |
-| npm | Latest | Node.js package manager |
+| pip     | Latest   | Python package manager            |
+| npm     | Latest   | Node.js package manager           |
 
 ### Python Packages (Pinned Versions)
 
@@ -171,6 +181,7 @@ pandas==2.3.3             # Data manipulation
 ### System Libraries
 
 Pre-installed for Chromium/Playwright:
+
 - Graphics: GTK, Cairo, Pango, Vulkan
 - Audio/Video: GStreamer, ALSA
 - Fonts: Liberation, Noto Color Emoji
@@ -179,6 +190,7 @@ Pre-installed for Chromium/Playwright:
 ### Docker Support
 
 **Docker-outside-of-Docker (DooD)** configuration:
+
 - Docker CLI installed in container
 - Host Docker socket mounted
 - Build and test containers securely
@@ -193,16 +205,19 @@ This DevContainer has been **security hardened** with the following measures:
 ### L Removed Dangerous Capabilities
 
 **Before (Insecure):**
+
 ```json
 "runArgs": ["--ipc=host", "--cap-add=SYS_ADMIN"]
 ```
 
 **After (Secure):**
+
 ```json
 "runArgs": ["--shm-size=2gb"]
 ```
 
 **Why?**
+
 - `SYS_ADMIN` = Near-root privileges, enables container escape
 - `ipc=host` = Breaks container isolation, exposes host memory
 - Neither is required for Playwright or Docker functionality
@@ -210,12 +225,14 @@ This DevContainer has been **security hardened** with the following measures:
 ### =� Supply Chain Protection
 
 All package versions are pinned to prevent:
+
 - � Malicious package updates
 - � Typosquatting attacks
 - � Compromised maintainer accounts
 - � Unexpected breaking changes
 
 **Example:**
+
 ```json
 "dependencies": {
   "playwright": "1.56.1",  // Exact version, no ^ or ~
@@ -232,6 +249,7 @@ All package versions are pinned to prevent:
 -  Docker socket (better than `--privileged`)
 
 **Security Audit Report:**
+
 - **20 security issues identified** in original configuration
 - **5 CRITICAL issues resolved** (SYS_ADMIN, ipc=host, unversioned packages)
 - **15 additional issues documented** with recommendations
@@ -259,18 +277,21 @@ print(data.describe())
 ### Example 2: Playwright Web Automation
 
 **Node.js:**
+
 ```bash
 cd ~/web-ui-optimizer
 node ui-optimizer.js https://example.com
 ```
 
 **Python:**
+
 ```bash
 cd ~/web-ui-optimizer
 python ui_optimizer.py https://example.com
 ```
 
 **Features:**
+
 - Captures responsive screenshots (mobile, tablet, desktop)
 - Analyzes color palette
 - Checks accessibility issues
@@ -401,11 +422,13 @@ Edit `.devcontainer/devcontainer.json` (line 375):
 ### Container Won't Start
 
 **Check Docker Desktop:**
+
 ```bash
 docker info  # Should show server information
 ```
 
 **Solutions:**
+
 - Ensure Docker Desktop is running
 - Restart Docker Desktop
 - Check disk space: `df -h`
@@ -414,6 +437,7 @@ docker info  # Should show server information
 ### Playwright Browser Not Found
 
 **Reinstall browsers:**
+
 ```bash
 cd ~/web-ui-optimizer
 npx playwright install chromium --with-deps
@@ -423,11 +447,13 @@ python -m playwright install chromium
 ### Docker Commands Not Working
 
 **Verify Docker socket:**
+
 ```bash
 docker ps  # Should show containers
 ```
 
 **Solutions:**
+
 - Rebuild container: `Cmd+Shift+P` � "Rebuild Container"
 - Check devcontainer.json has docker-outside-of-docker feature
 - Verify /var/run/docker.sock exists on host
@@ -435,12 +461,14 @@ docker ps  # Should show containers
 ### Python Package Installation Fails
 
 **Check pip:**
+
 ```bash
 pip --version
 pip install --upgrade pip
 ```
 
 **Solutions:**
+
 - Check network connectivity
 - Try with `--no-cache-dir`: `pip install --no-cache-dir package`
 - Check disk space: `df -h`
@@ -448,12 +476,14 @@ pip install --upgrade pip
 ### Display Issues (Xvfb)
 
 **Check Xvfb is running:**
+
 ```bash
 echo $DISPLAY  # Should show :99
 ps aux | grep Xvfb
 ```
 
 **Restart Xvfb:**
+
 ```bash
 pkill Xvfb
 Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp -nolisten unix &
@@ -463,11 +493,13 @@ export DISPLAY=:99
 ### Out of Disk Space
 
 **Clean Docker:**
+
 ```bash
 docker system prune -a --volumes  # WARNING: Removes all unused data
 ```
 
 **Check disk usage:**
+
 ```bash
 df -h
 du -sh ~/.cache/ms-playwright  # Browser cache
@@ -481,10 +513,12 @@ du -sh node_modules             # Node packages
 ### macOS/Windows Performance
 
 1. **Use WSL2 on Windows**
+
    - Docker Desktop � Settings � General � Use WSL2
    - 10x faster than Hyper-V
 
 2. **Increase Docker Resources**
+
    - Docker Desktop � Settings � Resources
    - CPUs: 4-8 cores
    - Memory: 8-16GB
@@ -497,11 +531,13 @@ du -sh node_modules             # Node packages
 ### Faster Container Rebuilds
 
 **Use Docker BuildKit:**
+
 ```bash
 export DOCKER_BUILDKIT=1
 ```
 
 **Clear caches selectively:**
+
 ```bash
 # Clear pip cache
 pip cache purge
@@ -513,6 +549,7 @@ npm cache clean --force
 ### Reduce Browser Download Time
 
 **Browsers are cached in Docker volume:**
+
 - First install: 2-5 minutes
 - Subsequent starts: Instant (cached)
 - Volume location: `~/.cache/ms-playwright`
@@ -575,18 +612,21 @@ Found a bug? Have a suggestion?
 ### Version 2.0 (Current)
 
 **Security Improvements:**
+
 -  Removed `SYS_ADMIN` capability (CRITICAL)
 -  Removed `ipc=host` flag (CRITICAL)
 -  Pinned all package versions
 -  Added comprehensive security documentation
 
 **Features:**
+
 -  Docker-outside-of-Docker support
 -  Playwright web automation tools
 -  Claude Code AI assistant
 -  GitHub CLI integration
 
 **Documentation:**
+
 -  700+ lines of inline comments
 -  Comprehensive README
 -  Security audit report
@@ -620,7 +660,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - =� [DevContainers Documentation](https://containers.dev/)
 - <� [Playwright Documentation](https://playwright.dev/)
 - =3 [Docker Documentation](https://docs.docker.com/)
-- > [Claude Code](https://claude.com/claude-code)
+- >  [Claude Code](https://claude.com/claude-code)
 - = [GitHub CLI](https://cli.github.com/)
 
 ---
@@ -630,15 +670,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Need help? Here's how to get support:
 
 1. **Check Documentation**
+
    - Read this README
    - Review inline comments in config files
    - Check troubleshooting section
 
 2. **Search Issues**
+
    - [Existing Issues](https://github.com/YOUR_USERNAME/YOUR_REPO/issues)
    - Someone may have had the same problem
 
 3. **Create an Issue**
+
    - Provide detailed information
    - Include error messages
    - Share environment details
@@ -655,7 +698,5 @@ Need help? Here's how to get support:
 **P Star this repository if you find it useful!**
 
 Made with d for developers who value security, documentation, and productivity.
-
-[Report Bug](https://github.com/YOUR_USERNAME/YOUR_REPO/issues) � [Request Feature](https://github.com/YOUR_USERNAME/YOUR_REPO/issues) � [Documentation](https://github.com/YOUR_USERNAME/YOUR_REPO/wiki)
 
 </div>
