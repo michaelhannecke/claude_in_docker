@@ -1,9 +1,10 @@
-# AI/ML Development Environment with Docker & Playwright
+# AI/ML Development Environment with Docker, Jupyter, and Playwright
 
-A comprehensive, security-hardened VS Code DevContainer configuration for AI/ML development, featuring Docker-outside-of-Docker support and Playwright browser automation.
+A comprehensive, security-hardened VS Code DevContainer configuration for AI/ML development, featuring full Jupyter Notebook/Lab support, Docker-outside-of-Docker, and Playwright browser automation.
 
 [![DevContainer](https://img.shields.io/badge/Dev%20Container-Ready-blue?logo=docker)](https://containers.dev/)
 [![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)](https://www.python.org/)
+[![Jupyter](https://img.shields.io/badge/Jupyter-Enabled-orange?logo=jupyter)](https://jupyter.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22-green?logo=node.js)](https://nodejs.org/)
 [![Security](https://img.shields.io/badge/Security-Hardened-success?logo=security)](https://github.com/anthropics/claude-code/security)
 
@@ -14,6 +15,7 @@ A comprehensive, security-hardened VS Code DevContainer configuration for AI/ML 
 - [Overview](#-overview)
 - [Features](#-features)
 - [Quick Start](#-quick-start)
+- [Starting Your Own Project](#-starting-your-own-project)
 - [What's Included](#-whats-included)
 - [Security Features](#-security-features)
 - [Usage Examples](#-usage-examples)
@@ -31,6 +33,7 @@ A comprehensive, security-hardened VS Code DevContainer configuration for AI/ML 
 This repository provides a **production-ready DevContainer environment** designed for:
 
 - 🐍 **AI/ML Development** - Python 3.12 with numpy, pandas, and data science tools
+- 📓 **Jupyter Support** - Full JupyterLab, Jupyter Notebook, and IPython kernel integration
 - 🐳 **Container Testing** - Docker-outside-of-Docker (DooD) for building and testing Docker images
 - 🎭 **Browser Automation** - Playwright with Chromium for web testing and UI optimization
 - 🔒 **Security First** - Hardened configuration with pinned dependencies and minimal privileges
@@ -51,6 +54,7 @@ This repository provides a **production-ready DevContainer environment** designe
 ### Development Tools
 
 - **Python 3.12** with pip, ipython, black, pylint
+- **Jupyter Ecosystem** - JupyterLab, Jupyter Notebook, IPython kernel, ipywidgets
 - **Node.js 22** with npm and global packages
 - **Claude Code** - AI-powered coding assistant
 - **GitHub CLI** - Manage PRs, issues, and repos from terminal
@@ -60,6 +64,7 @@ This repository provides a **production-ready DevContainer environment** designe
 
 - 🤖 **Anthropic Claude Code** - AI coding assistant
 - 🐍 **Python** (with Pylance, debugpy, black formatter)
+- 📓 **Jupyter** - Interactive notebooks with inline execution and debugging
 - 💅 **Prettier & ESLint** - Code formatting and linting
 - 💖 **GitLens** - Advanced Git visualization
 - 🐳 **Docker** - Container management
@@ -139,6 +144,10 @@ Pre-configured project with ready-to-use tools:
    # Check Python
    python --version  # Should show Python 3.12.x
 
+   # Check Jupyter (activate venv first)
+   source .venv/bin/activate
+   jupyter --version  # Should show Jupyter core packages
+
    # Check Node.js
    node --version    # Should show v22.x.x
 
@@ -152,6 +161,287 @@ Pre-configured project with ready-to-use tools:
 
 ---
 
+## 🚀 Starting Your Own Project
+
+Use this repository as a template to create your own AI/ML development environment. Follow these steps to set up a new project from scratch:
+
+### Method 1: GitHub Template (Recommended)
+
+1. **Use as Template on GitHub**
+
+   - Click the "Use this template" button at the top of this repository
+   - Choose "Create a new repository"
+   - Name your repository (e.g., `my-ml-project`)
+   - Choose visibility (Public/Private)
+   - Click "Create repository from template"
+
+2. **Clone Your New Repository**
+
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/my-ml-project.git
+   cd my-ml-project
+   ```
+
+3. **Open in VS Code**
+
+   ```bash
+   code .
+   ```
+
+4. **Reopen in Container**
+
+   - Click "Reopen in Container" when prompted
+   - Wait for initial setup (5-10 minutes first time)
+
+### Method 2: Manual Clone and Customize
+
+1. **Clone This Repository**
+
+   ```bash
+   git clone https://github.com/ORIGINAL_OWNER/REPO_NAME.git my-ml-project
+   cd my-ml-project
+   ```
+
+2. **Remove Git History and Start Fresh**
+
+   ```bash
+   # Remove existing git history
+   rm -rf .git
+
+   # Initialize new repository
+   git init
+   git add .
+   git commit -m "Initial commit: Set up DevContainer environment"
+   ```
+
+3. **Connect to Your Remote Repository**
+
+   ```bash
+   # Create a new repository on GitHub, then:
+   git remote add origin https://github.com/YOUR_USERNAME/my-ml-project.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+### Customization Steps
+
+Once you have your repository set up, customize it for your project:
+
+#### 1. Update Project Metadata
+
+**Edit `pyproject.toml`:**
+
+```toml
+[project]
+name = "my-ml-project"           # Your project name
+version = "0.1.0"
+description = "My awesome ML project"  # Your description
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jupyter>=1.1.1",
+    # Add your project-specific dependencies here
+    "scikit-learn>=1.3.0",
+    "matplotlib>=3.8.0",
+]
+```
+
+#### 2. Clean Up Example Files
+
+```bash
+# Remove example files (optional)
+rm test.ipynb                    # Remove example notebook
+rm main.py                       # Remove example Python file (if exists)
+
+# Keep these important files:
+# - .devcontainer/ (DevContainer configuration)
+# - .gitignore
+# - pyproject.toml
+# - README.md (update it for your project)
+```
+
+#### 3. Update README.md
+
+Replace the content of `README.md` with your project-specific documentation:
+
+```markdown
+# My ML Project
+
+Brief description of your project.
+
+## Setup
+
+This project uses a DevContainer for development. Simply open in VS Code and click "Reopen in Container".
+
+## Usage
+
+[Your project-specific instructions]
+
+## Development
+
+[Your development workflow]
+```
+
+#### 4. Add Your Code
+
+Create your project structure:
+
+```bash
+# Activate the virtual environment
+source .venv/bin/activate
+
+# Create your project structure
+mkdir -p src tests notebooks data
+
+# Example structure:
+# my-ml-project/
+# ├── src/              # Source code
+# │   └── __init__.py
+# ├── tests/            # Unit tests
+# │   └── test_*.py
+# ├── notebooks/        # Jupyter notebooks
+# │   └── analysis.ipynb
+# ├── data/             # Data files (add to .gitignore if large)
+# │   ├── raw/
+# │   └── processed/
+# └── scripts/          # Utility scripts
+```
+
+#### 5. Install Project Dependencies
+
+```bash
+# Activate virtual environment
+source .venv/bin/activate
+
+# Install your project in editable mode
+uv pip install -e .
+
+# Or install additional packages
+uv pip install scikit-learn matplotlib seaborn
+```
+
+#### 6. Update .gitignore
+
+Add project-specific ignores to `.gitignore`:
+
+```bash
+# Add to .gitignore
+echo "data/raw/*" >> .gitignore
+echo "data/processed/*" >> .gitignore
+echo "*.model" >> .gitignore
+echo "*.pkl" >> .gitignore
+```
+
+### What to Keep vs. What to Modify
+
+**✅ Keep These (Core DevContainer Setup):**
+- `.devcontainer/` - DevContainer configuration
+- `.gitignore` - Git ignore rules
+- `.venv/` - Virtual environment (auto-generated)
+- `pyproject.toml` - Customize for your project
+- `uv.lock` - Dependency lock file (auto-generated)
+
+**🔧 Customize These:**
+- `README.md` - Replace with your project documentation
+- `pyproject.toml` - Add your dependencies and metadata
+- Create your own source files in `src/`
+- Create your own notebooks in `notebooks/`
+
+**❌ Remove/Replace These (Examples):**
+- `test.ipynb` - Example notebook
+- `main.py` - Example Python file (if exists)
+
+### Optional: Customize DevContainer
+
+If you need different tools or configurations:
+
+**Add Python packages in `post-create.sh`:**
+
+Edit `.devcontainer/post-create.sh` around line 217:
+
+```bash
+uv pip install \
+    playwright==1.55.0 \
+    pytest==7.4.3 \
+    # Add your required packages
+    tensorflow>=2.15.0 \
+    torch>=2.1.0
+```
+
+**Add VS Code extensions in `devcontainer.json`:**
+
+Edit `.devcontainer/devcontainer.json` around line 182:
+
+```json
+"extensions": [
+    "anthropic.claude-code",
+    "ms-python.python",
+    // Add your extensions
+    "ms-toolsai.vscode-jupyter-powertoys"
+]
+```
+
+### First Commit Checklist
+
+Before making your first commit, verify:
+
+- [ ] Updated `pyproject.toml` with your project name and dependencies
+- [ ] Updated `README.md` with your project description
+- [ ] Removed or replaced example files (`test.ipynb`, `main.py`)
+- [ ] Added your project structure (`src/`, `tests/`, `notebooks/`)
+- [ ] Updated `.gitignore` with project-specific patterns
+- [ ] Tested that the DevContainer builds successfully
+- [ ] Verified Jupyter, Python, and Docker work correctly
+
+### Example Workflow
+
+Here's a complete example of starting a new ML project:
+
+```bash
+# 1. Use template on GitHub and clone
+git clone https://github.com/YOUR_USERNAME/sentiment-analysis.git
+cd sentiment-analysis
+
+# 2. Open in VS Code and reopen in container
+code .
+# Click "Reopen in Container"
+
+# 3. Once container is ready, customize
+source .venv/bin/activate
+
+# 4. Update project files
+cat > pyproject.toml << 'EOF'
+[project]
+name = "sentiment-analysis"
+version = "0.1.0"
+description = "Sentiment analysis ML project"
+requires-python = ">=3.12"
+dependencies = [
+    "jupyter>=1.1.1",
+    "scikit-learn>=1.3.0",
+    "pandas>=2.1.0",
+    "matplotlib>=3.8.0",
+]
+EOF
+
+# 5. Install dependencies
+uv pip install -e .
+
+# 6. Create project structure
+mkdir -p src/sentiment_analysis tests notebooks data/{raw,processed}
+touch src/sentiment_analysis/__init__.py
+
+# 7. Create your first notebook
+jupyter notebook notebooks/exploratory_analysis.ipynb
+
+# 8. Commit your customizations
+git add .
+git commit -m "Customize for sentiment analysis project"
+git push
+```
+
+---
+
 ## 📦 What's Included
 
 ### Base Environment
@@ -160,18 +450,36 @@ Pre-configured project with ready-to-use tools:
 | ------- | -------- | --------------------------------- |
 | Python  | 3.12     | Core programming language         |
 | Node.js | 22 (LTS) | JavaScript runtime for Playwright |
-| pip     | Latest   | Python package manager            |
+| uv      | Latest   | Fast Python package manager       |
 | npm     | Latest   | Node.js package manager           |
 
-### Python Packages (Pinned Versions)
+### Python Packages
 
+**Core Data Science & ML:**
+```python
+jupyter>=1.1.1            # Jupyter metapackage
+jupyterlab==4.4.10        # JupyterLab IDE
+notebook==7.4.7           # Jupyter Notebook
+ipython==9.6.0            # Interactive Python shell
+ipykernel==7.1.0          # IPython kernel for Jupyter
+ipywidgets==8.1.8         # Interactive widgets
+```
+
+**Browser Automation & Testing (Pinned Versions):**
 ```python
 playwright==1.55.0        # Browser automation
 pytest==7.4.3             # Testing framework
 pytest-playwright==0.7.1  # Pytest + Playwright integration
+```
+
+**Code Quality:**
+```python
 black==23.12.1            # Code formatter
 pylint==3.0.3             # Code linter
-ipython==8.18.1           # Interactive shell
+```
+
+**Data Science Tools:**
+```python
 numpy==1.26.2             # Numerical computing
 pandas==2.3.3             # Data manipulation
 ```
@@ -256,10 +564,42 @@ All package versions are pinned to prevent:
 
 ## 💡 Usage Examples
 
-### Example 1: Python Data Science
+### Example 1: Jupyter Notebooks
+
+**Start JupyterLab:**
+
+```bash
+# Activate the virtual environment
+source .venv/bin/activate
+
+# Start JupyterLab (opens in browser)
+jupyter lab
+
+# Or start classic Jupyter Notebook
+jupyter notebook
+
+# Or run a specific notebook
+jupyter notebook test.ipynb
+```
+
+**Use in VS Code:**
+
+- Open any `.ipynb` file in VS Code
+- The Jupyter extension provides inline execution and debugging
+- Select kernel: Python 3.12 (.venv)
+- Run cells interactively with integrated outputs
+
+**IPython Interactive Shell:**
+
+```bash
+source .venv/bin/activate
+ipython
+```
+
+### Example 2: Python Data Science
 
 ```python
-# Create a new Python script
+# Create a new Python script or Jupyter notebook
 import pandas as pd
 import numpy as np
 
@@ -272,7 +612,7 @@ data = pd.DataFrame({
 print(data.describe())
 ```
 
-### Example 2: Playwright Web Automation
+### Example 3: Playwright Web Automation
 
 **Node.js:**
 
@@ -295,7 +635,7 @@ python ui_optimizer.py https://example.com
 - Checks accessibility issues
 - Measures performance metrics
 
-### Example 3: Docker Container Testing
+### Example 4: Docker Container Testing
 
 ```bash
 # Build a Docker image
@@ -315,7 +655,7 @@ docker stop $(docker ps -q)
 docker system prune -f
 ```
 
-### Example 4: Using Claude Code
+### Example 5: Using Claude Code
 
 ```bash
 # Start Claude Code
@@ -325,7 +665,7 @@ claude-code
 # Claude Code is pre-installed globally
 ```
 
-### Example 5: GitHub CLI Operations
+### Example 6: GitHub CLI Operations
 
 ```bash
 # Authenticate
@@ -350,8 +690,12 @@ gh repo clone username/repo
 ├── .devcontainer/
 │   ├── devcontainer.json      # DevContainer configuration (570 lines with docs)
 │   └── post-create.sh          # Setup script (1100+ lines with docs)
+├── .venv/                      # Python virtual environment with Jupyter
 ├── .claude/                    # Claude Code configuration
-├── .gitignore                  # Git ignore rules (includes .DS_Store)
+├── .gitignore                  # Git ignore rules
+├── pyproject.toml              # Python project configuration
+├── uv.lock                     # Locked dependencies (uv package manager)
+├── test.ipynb                  # Example Jupyter notebook
 ├── README.md                   # This file
 └── ~/web-ui-optimizer/         # Playwright tools (created during setup)
     ├── package.json            # Node.js project config
@@ -369,10 +713,32 @@ gh repo clone username/repo
 
 #### Add More Python Packages
 
-Edit `.devcontainer/post-create.sh` (line 201):
+**Using pyproject.toml (Recommended):**
+
+Edit `pyproject.toml` to add dependencies:
+
+```toml
+[project]
+dependencies = [
+    "jupyter>=1.1.1",
+    "scikit-learn>=1.3.2",
+    "tensorflow>=2.15.0",
+]
+```
+
+Then install with uv:
 
 ```bash
-pip install \
+source .venv/bin/activate
+uv pip install -e .
+```
+
+**Or using post-create.sh:**
+
+Edit `.devcontainer/post-create.sh` (line 205):
+
+```bash
+uv pip install \
     playwright==1.55.0 \
     pytest==7.4.3 \
     # Add your packages here
@@ -458,18 +824,34 @@ docker ps  # Should show containers
 
 ### Python Package Installation Fails
 
-**Check pip:**
+**Check uv:**
 
 ```bash
-pip --version
-pip install --upgrade pip
+uv --version
 ```
 
 **Solutions:**
 
 - Check network connectivity
-- Try with `--no-cache-dir`: `pip install --no-cache-dir package`
+- Reinstall uv: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- Try with `--no-cache`: `uv pip install --no-cache package`
 - Check disk space: `df -h`
+
+### Jupyter Not Found
+
+**Activate the virtual environment:**
+
+```bash
+source .venv/bin/activate
+jupyter --version
+```
+
+**Solutions:**
+
+- Ensure you've activated the venv: `source .venv/bin/activate`
+- Reinstall Jupyter: `uv pip install jupyter jupyterlab`
+- Check if installed: `pip list | grep jupyter`
+- In VS Code, select the correct kernel (.venv) when opening notebooks
 
 ### Display Issues (Xvfb)
 
@@ -537,8 +919,8 @@ export DOCKER_BUILDKIT=1
 **Clear caches selectively:**
 
 ```bash
-# Clear pip cache
-pip cache purge
+# Clear uv cache
+uv cache clean
 
 # Clear npm cache
 npm cache clean --force

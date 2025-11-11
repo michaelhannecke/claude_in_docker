@@ -139,15 +139,15 @@
   //
   // What does post-create.sh do?
   // - Installs system packages (browsers, libraries)
-  // - Installs Python packages (pip install)
+  // - Installs Python packages (uv pip install)
   // - Installs npm packages globally
   // - Downloads Playwright browsers
   // - Creates project directories
   // - Generates utility scripts and documentation
   //
   // Alternative commands:
-  // - Multiple commands: "postCreateCommand": "apt-get update && pip install -r requirements.txt"
-  // - JSON array: "postCreateCommand": ["pip", "install", "-r", "requirements.txt"]
+  // - Multiple commands: "postCreateCommand": "apt-get update && uv pip install -r requirements.txt"
+  // - JSON array: "postCreateCommand": ["uv", "pip", "install", "-r", "requirements.txt"]
   // - Compound commands: "postCreateCommand": "command1 && command2 && command3"
   //
   // Troubleshooting:
@@ -189,9 +189,11 @@
         // - ms-python.python: Core Python extension (IntelliSense, debugging, linting)
         // - vscode-pylance: Fast, feature-rich language server
         // - debugpy: Python debugger for breakpoints and debugging
+        // - jupyter: Jupyter notebook support (interactive notebooks, kernel management)
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-python.debugpy",
+        "ms-toolsai.jupyter",
 
         // Code Formatting & Linting
         // - prettier-vscode: Auto-format JavaScript, TypeScript, JSON, Markdown
@@ -546,7 +548,7 @@
   // "shutdownAction": "stopContainer"
   // → What to do on VS Code close (default: stop, alternative: none)
   //
-  // "updateContentCommand": "pip install -r requirements.txt"
+  // "updateContentCommand": "uv pip install -r requirements.txt"
   // → Runs on every container start (different from postCreateCommand)
   //
   // "initializeCommand": "echo Starting..."

@@ -167,9 +167,11 @@ npm install -g @anthropic-ai/claude-code@2.0.32
 # ==============================================================================
 # Install Python packages for Playwright automation and data science
 #
-# UPGRADE PIP FIRST:
-# - Ensures we have latest pip features and security fixes
-# - Older pip versions may have installation issues
+# USING UV PACKAGE MANAGER:
+# - uv is a fast Python package installer (10-100x faster than pip)
+# - Written in Rust, highly optimized for speed
+# - Drop-in replacement for pip commands
+# - Compatible with pip's package ecosystem
 #
 # SECURITY: All Versions Pinned
 # - playwright==1.55.0: Browser automation framework
@@ -192,13 +194,27 @@ npm install -g @anthropic-ai/claude-code@2.0.32
 # - Check for vulnerabilities: pip-audit or safety
 # - Review changelogs before updating
 #
-# TIME: 2-3 minutes
+# TIME: 30-60 seconds (much faster with uv!)
 # SIZE: ~200-300MB (numpy/pandas are large)
 # ==============================================================================
-print_status "Installing Python packages..."
-pip install --upgrade pip
+print_status "Installing Python packages with uv..."
+# Install uv if not already present
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Use alternative cache directory for uv to avoid conflicts
+export UV_CACHE_DIR="/tmp/uv_cache"
+mkdir -p "$UV_CACHE_DIR"
+
+# Create a virtual environment
+print_status "Creating Python virtual environment..."
+uv venv ~/venv
+source ~/venv/bin/activate
+
+
 # SECURITY: Pin versions to prevent supply chain attacks
-pip install \
+# Install globally using uv tool install for CLI tools, or use project-specific venvs
+uv pip install \
     playwright==1.55.0 \
     pytest==7.4.3 \
     pytest-playwright==0.7.1 \
@@ -207,6 +223,10 @@ pip install \
     ipython==8.18.1 \
     numpy==1.26.2 \
     pandas==2.3.3
+
+echo 'source ~/venv/bin/activate' >> ~/.bashrc
+print_success "Python packages installed successfully"
+
 
 # ==============================================================================
 # SECTION 4: DOCKER VERIFICATION
@@ -1201,6 +1221,16 @@ docker run -p 3000:3000 web-app
 - Resource limits apply to the host system
 - Network configuration may differ from production environments
 EOF
+
+# ==============================================================================
+# SECTION 11: FIX CACHE DIRECTORY PERMISSIONS
+# ==============================================================================
+# Ensure .cache directory is owned by vscode user
+# This prevents permission errors when tools like uv try to create cache files
+# ==============================================================================
+print_status "Fixing cache directory permissions..."
+sudo chown -R vscode:vscode /home/vscode/.cache 2>/dev/null || true
+print_success "Cache permissions fixed"
 
 # Final setup message
 echo ""

@@ -11,3 +11,6 @@ wheels/
 
 # macOS system files
 .DS_Store
+
+# UV locks
+*.lock
