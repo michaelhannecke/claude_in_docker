@@ -1,11 +1,11 @@
-# AI/ML Development Environment with Docker, Jupyter, and Playwright
+# Claude Code in Docker - Complete DevContainer Integration
 
-A comprehensive, security-hardened VS Code DevContainer configuration for AI/ML development, featuring full Jupyter Notebook/Lab support, Docker-outside-of-Docker, and Playwright browser automation.
+A production-ready VS Code DevContainer specifically designed for **Claude Code integration**, providing a fully-configured development environment with Python, Jupyter, Docker support, and browser automation capabilities.
 
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-Integrated-blueviolet?logo=anthropic)](https://claude.com/claude-code)
 [![DevContainer](https://img.shields.io/badge/Dev%20Container-Ready-blue?logo=docker)](https://containers.dev/)
 [![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)](https://www.python.org/)
 [![Jupyter](https://img.shields.io/badge/Jupyter-Enabled-orange?logo=jupyter)](https://jupyter.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-22-green?logo=node.js)](https://nodejs.org/)
 [![Security](https://img.shields.io/badge/Security-Hardened-success?logo=security)](https://github.com/anthropics/claude-code/security)
 
 ---
@@ -13,6 +13,7 @@ A comprehensive, security-hardened VS Code DevContainer configuration for AI/ML 
 ## 📚 Table of Contents
 
 - [Overview](#-overview)
+- [Why Claude Code in Docker?](#-why-claude-code-in-docker)
 - [Features](#-features)
 - [Quick Start](#-quick-start)
 - [Starting Your Own Project](#-starting-your-own-project)
@@ -30,46 +31,103 @@ A comprehensive, security-hardened VS Code DevContainer configuration for AI/ML 
 
 ## 🎯 Overview
 
-This repository provides a **production-ready DevContainer environment** designed for:
+This repository demonstrates **how to run Claude Code in a fully-featured Docker DevContainer**, providing you with:
 
-- 🐍 **AI/ML Development** - Python 3.12 with numpy, pandas, and data science tools
-- 📓 **Jupyter Support** - Full JupyterLab, Jupyter Notebook, and IPython kernel integration
-- 🐳 **Container Testing** - Docker-outside-of-Docker (DooD) for building and testing Docker images
-- 🎭 **Browser Automation** - Playwright with Chromium for web testing and UI optimization
-- 🔒 **Security First** - Hardened configuration with pinned dependencies and minimal privileges
-- 📖 **Comprehensive Documentation** - Extensively commented configuration files for learning
+- 🤖 **Claude Code Ready** - Pre-configured and ready to use with all dependencies
+- 🐳 **Complete Docker Integration** - Docker-outside-of-Docker (DooD) for container workflows
+- 🐍 **Python Development** - Python 3.12 with data science tools (numpy, pandas)
+- 📓 **Jupyter Notebooks** - Full JupyterLab, Jupyter Notebook, and IPython kernel support
+- 🎭 **Browser Automation** - Playwright with Chromium for web testing
+- 🔒 **Security Hardened** - No privileged containers, pinned dependencies, minimal attack surface
+- 📖 **Extensively Documented** - 700+ lines of inline documentation explaining every configuration choice
 
-### Why This DevContainer?
+### Why Use Claude Code in a DevContainer?
 
-✅ **Consistent Development Environment** - Same setup across all team members
-✅ **Zero Configuration** - Everything pre-installed and configured
-✅ **Security Hardened** - Dangerous capabilities removed, versions pinned
-✅ **Fast Setup** - One-click setup with VS Code Dev Containers
-✅ **Well Documented** - Learn from 700+ lines of inline documentation
+✅ **Isolated Environment** - Keep Claude Code and its dependencies separate from your host system
+✅ **Reproducible Setup** - Share the exact same environment with your team
+✅ **Pre-configured Tools** - Python, Jupyter, Docker, and Playwright all ready to use
+✅ **Security Focused** - Hardened configuration with removed dangerous capabilities
+✅ **Cross-Platform** - Works identically on Windows, macOS, and Linux
+✅ **One-Click Setup** - Just open in VS Code and click "Reopen in Container"
+
+---
+
+## 🚀 Why Claude Code in Docker?
+
+### The Problem
+
+Setting up Claude Code with a complete development environment can be challenging:
+
+- **Dependency Hell** - Python versions, Node.js, system libraries all need to align
+- **Configuration Complexity** - Jupyter, Docker, Playwright each require specific setup
+- **Platform Differences** - What works on macOS might break on Windows or Linux
+- **Team Inconsistency** - Each developer's environment is slightly different
+- **Host System Pollution** - Installing tools globally clutters your system
+
+### The Solution: This DevContainer
+
+This repository provides a **complete, ready-to-use DevContainer** for Claude Code that:
+
+✅ **Works Immediately** - Open in VS Code, click "Reopen in Container", and start using Claude Code
+✅ **Fully Integrated** - Claude Code has access to Python, Jupyter, Docker, Playwright, and all tools
+✅ **Reproducible** - Share this repository, and everyone gets the identical environment
+✅ **Isolated** - All dependencies stay in the container, not on your host system
+✅ **Secure** - Hardened configuration with dangerous capabilities removed
+✅ **Cross-Platform** - Works identically on Windows, macOS, and Linux
+
+### What Makes This Special?
+
+This isn't just a basic Python container with Claude Code installed. It's a **complete AI development environment** that includes:
+
+- **Full Docker Support** - Docker-outside-of-Docker (DooD) so Claude Code can help build containers
+- **Jupyter Integration** - Claude Code can create and modify Jupyter notebooks
+- **Browser Automation** - Playwright pre-configured for web testing and UI work
+- **Security Hardening** - Removed `SYS_ADMIN` and `ipc=host` dangerous flags
+- **Extensive Documentation** - 700+ lines of inline comments explaining every choice
+- **Production Ready** - Pinned versions, locked dependencies, ready for real work
+
+### Use Cases
+
+Perfect for:
+
+- 🤖 **AI-Assisted Development** - Let Claude Code help with Python, Docker, and Jupyter projects
+- 📓 **Data Science** - Analyze data in Jupyter notebooks with Claude Code's assistance
+- 🐳 **DevOps Work** - Build and test Docker containers with AI guidance
+- 🎭 **Web Automation** - Create Playwright scripts with Claude Code
+- 👥 **Team Projects** - Everyone uses the same environment, no "works on my machine"
+- 🎓 **Learning** - Study how to properly configure DevContainers for AI tools
 
 ---
 
 ## ✨ Features
 
-### Development Tools
+### Claude Code Integration
 
-- **Python 3.12** with pip, ipython, black, pylint
+- **🤖 Anthropic Claude Code** - Pre-installed and configured AI coding assistant
+- **🔌 Full VS Code Extension** - Seamless integration with the IDE
+- **🐳 Containerized Environment** - Isolated from your host system
+- **📦 All Dependencies Included** - Python, Node.js, Git, and system tools
+- **⚡ Ready to Use** - No additional configuration required
+
+### Supporting Development Tools
+
+- **Python 3.12** - With pip, ipython, black, pylint for code quality
 - **Jupyter Ecosystem** - JupyterLab, Jupyter Notebook, IPython kernel, ipywidgets
-- **Node.js 22** with npm and global packages
-- **Claude Code** - AI-powered coding assistant
-- **GitHub CLI** - Manage PRs, issues, and repos from terminal
-- **Docker CLI** - Build and test containers securely
+- **Node.js 22 LTS** - For JavaScript/TypeScript development and tooling
+- **GitHub CLI** - Manage PRs, issues, and repos directly from terminal
+- **Docker CLI** - Build and test containers with Docker-outside-of-Docker (DooD)
+- **Playwright** - Browser automation for web testing and UI optimization
 
 ### Pre-configured VS Code Extensions
 
-- 🤖 **Anthropic Claude Code** - AI coding assistant
-- 🐍 **Python** (with Pylance, debugpy, black formatter)
+- 🤖 **Anthropic Claude Code** - The star of the show
+- 🐍 **Python** - Full language support with Pylance, debugpy, and black formatter
 - 📓 **Jupyter** - Interactive notebooks with inline execution and debugging
-- 💅 **Prettier & ESLint** - Code formatting and linting
-- 💖 **GitLens** - Advanced Git visualization
-- 🐳 **Docker** - Container management
-- 🎭 **Playwright** - Browser automation and testing
-- ✨ **And 10+ more quality-of-life extensions**
+- 💅 **Prettier & ESLint** - Code formatting and linting for multiple languages
+- 💖 **GitLens** - Enhanced Git visualization and history
+- 🐳 **Docker** - Container management and Dockerfile support
+- 🎭 **Playwright** - Browser automation testing framework
+- ✨ **And 10+ more** - Quality-of-life extensions for productive development
 
 ### Playwright Web UI Optimizer
 
@@ -163,7 +221,7 @@ Pre-configured project with ready-to-use tools:
 
 ## 🚀 Starting Your Own Project
 
-Use this repository as a template to create your own AI/ML development environment. Follow these steps to set up a new project from scratch:
+Use this repository as a **template for your own Claude Code-enabled projects**. This DevContainer setup provides the perfect foundation for any project where you want Claude Code integrated with a complete development environment.
 
 ### Method 1: GitHub Template (Recommended)
 
@@ -233,9 +291,9 @@ Once you have your repository set up, customize it for your project:
 
 ```toml
 [project]
-name = "my-ml-project"           # Your project name
+name = "my-claude-project"       # Your project name
 version = "0.1.0"
-description = "My awesome ML project"  # Your description
+description = "My project with Claude Code integration"  # Your description
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -335,6 +393,7 @@ echo "*.pkl" >> .gitignore
 ### What to Keep vs. What to Modify
 
 **✅ Keep These (Core DevContainer Setup):**
+
 - `.devcontainer/` - DevContainer configuration
 - `.gitignore` - Git ignore rules
 - `.venv/` - Virtual environment (auto-generated)
@@ -342,12 +401,14 @@ echo "*.pkl" >> .gitignore
 - `uv.lock` - Dependency lock file (auto-generated)
 
 **🔧 Customize These:**
+
 - `README.md` - Replace with your project documentation
 - `pyproject.toml` - Add your dependencies and metadata
 - Create your own source files in `src/`
 - Create your own notebooks in `notebooks/`
 
 **❌ Remove/Replace These (Examples):**
+
 - `test.ipynb` - Example notebook
 - `main.py` - Example Python file (if exists)
 
@@ -456,6 +517,7 @@ git push
 ### Python Packages
 
 **Core Data Science & ML:**
+
 ```python
 jupyter>=1.1.1            # Jupyter metapackage
 jupyterlab==4.4.10        # JupyterLab IDE
@@ -466,6 +528,7 @@ ipywidgets==8.1.8         # Interactive widgets
 ```
 
 **Browser Automation & Testing (Pinned Versions):**
+
 ```python
 playwright==1.55.0        # Browser automation
 pytest==7.4.3             # Testing framework
@@ -473,12 +536,14 @@ pytest-playwright==0.7.1  # Pytest + Playwright integration
 ```
 
 **Code Quality:**
+
 ```python
 black==23.12.1            # Code formatter
 pylint==3.0.3             # Code linter
 ```
 
 **Data Science Tools:**
+
 ```python
 numpy==1.26.2             # Numerical computing
 pandas==2.3.3             # Data manipulation
@@ -655,15 +720,37 @@ docker stop $(docker ps -q)
 docker system prune -f
 ```
 
-### Example 5: Using Claude Code
+### Example 5: Using Claude Code (Primary Use Case)
+
+**In VS Code:**
+
+- Claude Code is pre-installed as a VS Code extension
+- Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
+- Type "Claude" to see all available Claude Code commands
+- Use the Claude Code sidebar to interact with the AI assistant
+- Claude Code has full access to the containerized environment
+
+**From Terminal:**
 
 ```bash
-# Start Claude Code
+# Start Claude Code CLI
 claude-code
 
-# Or use in your terminal for AI assistance
-# Claude Code is pre-installed globally
+# Claude Code can now assist with:
+# - Writing Python code and Jupyter notebooks
+# - Docker container operations
+# - Playwright browser automation
+# - Git operations with GitHub CLI
+# - Any task within the containerized environment
 ```
+
+**Why This Matters:**
+
+Running Claude Code in a DevContainer provides:
+- **Consistent Context** - Claude Code sees the same environment as your tools
+- **Safe Experimentation** - Changes are isolated from your host system
+- **Full Toolchain Access** - Python, Docker, Jupyter, Playwright all available to Claude
+- **Reproducible Results** - Share the entire environment with teammates
 
 ### Example 6: GitHub CLI Operations
 
@@ -1022,10 +1109,14 @@ Found a bug? Have a suggestion?
 
 ## 🙏 Acknowledgments
 
-- **Anthropic** - For Claude Code AI assistant
-- **Microsoft** - For DevContainers and VS Code
-- **Playwright Team** - For browser automation framework
-- **Docker** - For containerization technology
+This repository exists primarily to showcase and enable **Claude Code integration in Docker environments**.
+
+Special thanks to:
+
+- **Anthropic** - For creating Claude Code, the AI-powered coding assistant that is the centerpiece of this repository
+- **Microsoft** - For DevContainers and VS Code, which make this integration seamless
+- **Playwright Team** - For browser automation capabilities that complement Claude Code
+- **Docker** - For containerization technology that makes this environment reproducible
 
 ---
 
@@ -1077,6 +1168,17 @@ Need help? Here's how to get support:
 
 **⭐ Star this repository if you find it useful!**
 
-Made with ❤️ for developers who value security, documentation, and productivity.
+Made with ❤️ for developers who want to use **Claude Code in a fully-featured, isolated Docker environment**.
+
+---
+
+### 🤖 Ready to Use Claude Code in Docker?
+
+1. Clone this repository
+2. Open in VS Code
+3. Click "Reopen in Container"
+4. Start using Claude Code with full Python, Jupyter, Docker, and Playwright support!
+
+**This is the complete Claude Code DevContainer integration you've been looking for.**
 
 </div>
