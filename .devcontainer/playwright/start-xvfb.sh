@@ -86,6 +86,19 @@ print_info "Starting Xvfb virtual display..."
 print_info "Display: ${XVFB_DISPLAY}"
 print_info "Resolution: ${DISPLAY_RESOLUTION}"
 
+# Clean up stale lock files from previous runs
+# This prevents "Server is already active for display 99" errors
+if [ -f "/tmp/.X${DISPLAY_NUM}-lock" ]; then
+    print_warning "Removing stale Xvfb lock file..."
+    rm -f "/tmp/.X${DISPLAY_NUM}-lock"
+fi
+
+# Clean up stale X11 socket files
+if [ -S "/tmp/.X11-unix/X${DISPLAY_NUM}" ]; then
+    print_warning "Removing stale X11 socket..."
+    rm -f "/tmp/.X11-unix/X${DISPLAY_NUM}"
+fi
+
 # Start Xvfb in background
 # Options:
 #   :99                    - Display number

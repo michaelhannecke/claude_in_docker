@@ -71,14 +71,14 @@ RUN chmod +x /app/start-xvfb.sh /app/healthcheck.sh
 # ============================================================================
 # Create minimal package.json and install required npm packages
 # - express: HTTP server framework
-# - playwright: Browser automation library (already in base image)
+# - playwright: Browser automation library
 # - cors: Cross-Origin Resource Sharing support
 # ============================================================================
 WORKDIR /app
 
-# Create package.json
+# Create package.json and install dependencies
 RUN npm init -y && \
-    npm install express cors
+    npm install express cors playwright@1.55.0
 
 # ============================================================================
 # ENVIRONMENT VARIABLES

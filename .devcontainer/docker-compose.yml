@@ -116,7 +116,7 @@ services:
     ports:
       - "3001:3001"   # Node.js apps
       - "4000:4000"   # GraphQL servers
-      - "5000:5000"   # Flask/Python web apps
+      - "5001:5000"   # Flask/Python web apps (host:container)
       - "5173:5173"   # Vite dev server
       - "8000:8000"   # FastAPI/Django
       - "8080:8080"   # Alternative HTTP
