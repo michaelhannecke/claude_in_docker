@@ -1,0 +1,364 @@
+# ============================================================================
+# DOCKER COMPOSE CONFIGURATION - MULTI-CONTAINER DEVCONTAINER
+# ============================================================================
+# This docker-compose file orchestrates a multi-container development environment
+# consisting of:
+# 1. workspace: Main development container (Python, Jupyter, Docker CLI)
+# 2. playwright: Browser automation service (Chromium, Xvfb, HTTP API)
+#
+# Architecture:
+# - Both containers connected via playwright-network (bridge)
+# - workspace depends on playwright being healthy
+# - Shared volumes for test artifacts
+# - Docker socket mounted for DooD (Docker-outside-of-Docker)
+#
+# Usage:
+# - docker-compose up -d           # Start all services
+# - docker-compose ps              # Check status
+# - docker-compose logs -f         # Follow logs
+# - docker-compose down            # Stop all services
+# ============================================================================
+
+version: '3.8'
+
+# ============================================================================
+# SERVICES
+# ============================================================================
+services:
+
+  # --------------------------------------------------------------------------
+  # WORKSPACE SERVICE
+  # --------------------------------------------------------------------------
+  # Main development container for coding, debugging, and running applications
+  #
+  # Responsibilities:
+  # - Code editing and debugging
+  # - Running Python applications and Jupyter notebooks
+  # - Git operations
+  # - Docker operations (via DooD)
+  # - Playwright client (connects to playwright service)
+  #
+  # This is the container that VS Code DevContainers will connect to
+  # --------------------------------------------------------------------------
+  workspace:
+    # Build configuration
+    build:
+      context: .
+      dockerfile: workspace/Dockerfile
+      args:
+        # Pass build-time variables if needed
+        PYTHON_VERSION: "3.12"
+
+    # Container name (easier to reference in commands)
+    container_name: claude-workspace
+
+    # Hostname (for networking)
+    hostname: workspace
+
+    # -------------------------------------------------------------------------
+    # VOLUME MOUNTS
+    # -------------------------------------------------------------------------
+    volumes:
+      # Source code (bind mount from host)
+      # cached: Optimizes performance on macOS/Windows
+      # The .. goes up from .devcontainer to project root
+      - ..:/workspaces/claude_in_devcontainer:cached
+
+      # Docker socket for Docker-outside-of-Docker
+      # Allows running docker commands from within the container
+      # Security: Provides root-equivalent access to host Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+
+      # Performance volumes (stored in Docker, not on host)
+      # Much faster than bind mounts on macOS/Windows
+      - node_modules:/workspaces/claude_in_devcontainer/node_modules
+
+      # UV cache for faster Python package installations
+      - uv_cache:/home/vscode/.cache/uv
+
+      # Python virtual environment (persistent across rebuilds)
+      - venv:/home/vscode/.venv
+
+      # Shared volumes with playwright service (for test artifacts)
+      - playwright_screenshots:/artifacts/screenshots:rw
+      - playwright_videos:/artifacts/videos:rw
+      - playwright_traces:/artifacts/traces:rw
+
+    # -------------------------------------------------------------------------
+    # ENVIRONMENT VARIABLES
+    # -------------------------------------------------------------------------
+    environment:
+      # Playwright service URL (internal Docker DNS)
+      # workspace container can reach playwright:3000
+      - PLAYWRIGHT_SERVICE_URL=http://playwright:3000
+
+      # Display for any local X11 apps (matches playwright display)
+      - DISPLAY=:99
+
+      # Development mode flags
+      - NODE_ENV=development
+      - PYTHONUNBUFFERED=1
+
+      # Path to virtual environment
+      - VIRTUAL_ENV=/home/vscode/.venv
+
+    # -------------------------------------------------------------------------
+    # NETWORKING
+    # -------------------------------------------------------------------------
+    networks:
+      - playwright-network
+
+    # -------------------------------------------------------------------------
+    # PORT FORWARDING
+    # -------------------------------------------------------------------------
+    # These ports are forwarded to the host
+    # VS Code will auto-forward them when services start
+    ports:
+      - "3001:3001"   # Node.js apps
+      - "4000:4000"   # GraphQL servers
+      - "5000:5000"   # Flask/Python web apps
+      - "5173:5173"   # Vite dev server
+      - "8000:8000"   # FastAPI/Django
+      - "8080:8080"   # Alternative HTTP
+      - "8888:8888"   # Jupyter Lab
+
+    # -------------------------------------------------------------------------
+    # DEPENDENCIES
+    # -------------------------------------------------------------------------
+    # Wait for playwright service to be healthy before starting
+    depends_on:
+      playwright:
+        condition: service_healthy
+
+    # -------------------------------------------------------------------------
+    # STARTUP COMMAND
+    # -------------------------------------------------------------------------
+    # Keep container running indefinitely
+    # VS Code DevContainers will execute commands inside this running container
+    command: sleep infinity
+
+    # -------------------------------------------------------------------------
+    # RESOURCE LIMITS
+    # -------------------------------------------------------------------------
+    # Prevent container from consuming too many host resources
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'        # Maximum 4 CPU cores
+          memory: 8G         # Maximum 8GB RAM
+        reservations:
+          cpus: '2.0'        # Minimum 2 CPU cores
+          memory: 4G         # Minimum 4GB RAM
+
+    # -------------------------------------------------------------------------
+    # RESTART POLICY
+    # -------------------------------------------------------------------------
+    # unless-stopped: Restart on failure, but not after manual stop
+    restart: unless-stopped
+
+  # --------------------------------------------------------------------------
+  # PLAYWRIGHT SERVICE
+  # --------------------------------------------------------------------------
+  # Browser automation service running Chromium with HTTP API
+  #
+  # Responsibilities:
+  # - Running Chromium browser (headless)
+  # - Xvfb virtual display
+  # - HTTP API for browser automation
+  # - Storing test artifacts (screenshots, videos, traces)
+  #
+  # Accessed by workspace container via http://playwright:3000
+  # --------------------------------------------------------------------------
+  playwright:
+    # Build configuration
+    build:
+      context: playwright
+      dockerfile: Dockerfile
+
+    # Container name
+    container_name: claude-playwright
+
+    # Hostname
+    hostname: playwright
+
+    # -------------------------------------------------------------------------
+    # VOLUME MOUNTS
+    # -------------------------------------------------------------------------
+    volumes:
+      # Browser cache (persistent, survives container restarts)
+      # Chromium is ~300MB, avoid re-downloading
+      - playwright_browsers:/ms-playwright
+
+      # Shared artifact volumes (workspace can access these)
+      - playwright_screenshots:/artifacts/screenshots:rw
+      - playwright_videos:/artifacts/videos:rw
+      - playwright_traces:/artifacts/traces:rw
+
+    # -------------------------------------------------------------------------
+    # ENVIRONMENT VARIABLES
+    # -------------------------------------------------------------------------
+    environment:
+      # Display for Xvfb
+      - DISPLAY=:99
+
+      # Playwright browser configuration
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+      - PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0
+
+      # Node.js environment
+      - NODE_ENV=production
+
+    # -------------------------------------------------------------------------
+    # NETWORKING
+    # -------------------------------------------------------------------------
+    networks:
+      - playwright-network
+
+    # -------------------------------------------------------------------------
+    # EXPOSE PORTS (Internal Only)
+    # -------------------------------------------------------------------------
+    # Port 3000 is only accessible within the Docker network
+    # Not exposed to host (security by design)
+    expose:
+      - "3000"
+
+    # -------------------------------------------------------------------------
+    # HEALTH CHECK
+    # -------------------------------------------------------------------------
+    # Docker will periodically check if the service is healthy
+    # workspace service waits for this to be healthy before starting
+    healthcheck:
+      test: ["CMD", "/app/healthcheck.sh"]
+      interval: 30s           # Check every 30 seconds
+      timeout: 10s            # Wait up to 10 seconds for response
+      retries: 3              # Mark unhealthy after 3 failures
+      start_period: 40s       # Grace period during startup
+
+    # -------------------------------------------------------------------------
+    # SHARED MEMORY SIZE
+    # -------------------------------------------------------------------------
+    # Chromium requires large shared memory for rendering
+    # Default 64MB is too small, 2GB is sufficient
+    shm_size: '2gb'
+
+    # -------------------------------------------------------------------------
+    # RESOURCE LIMITS
+    # -------------------------------------------------------------------------
+    # Browsers are resource-intensive, limit to prevent host exhaustion
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'        # Maximum 2 CPU cores
+          memory: 2G         # Maximum 2GB RAM
+        reservations:
+          cpus: '1.0'        # Minimum 1 CPU core
+          memory: 1G         # Minimum 1GB RAM
+
+    # -------------------------------------------------------------------------
+    # RESTART POLICY
+    # -------------------------------------------------------------------------
+    restart: unless-stopped
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+# Define custom network for service-to-service communication
+# --------------------------------------------------------------------------
+networks:
+  playwright-network:
+    driver: bridge
+    name: playwright-network
+    # Enable DNS for service name resolution
+    # workspace can reach playwright via "playwright:3000"
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+# Named volumes for persistent data and performance optimization
+# --------------------------------------------------------------------------
+volumes:
+  # -------------------------------------------------------------------------
+  # Performance Volumes (workspace)
+  # -------------------------------------------------------------------------
+  # These volumes improve performance on macOS/Windows by storing data
+  # in Docker's native filesystem instead of bind mounts
+
+  node_modules:
+    name: claude-node-modules
+    driver: local
+
+  uv_cache:
+    name: claude-uv-cache
+    driver: local
+
+  venv:
+    name: claude-venv
+    driver: local
+
+  # -------------------------------------------------------------------------
+  # Browser Cache (playwright)
+  # -------------------------------------------------------------------------
+  # Stores downloaded browser binaries (~300MB)
+  # Persists across container rebuilds to avoid re-downloading
+
+  playwright_browsers:
+    name: claude-playwright-browsers
+    driver: local
+
+  # -------------------------------------------------------------------------
+  # Shared Artifact Volumes
+  # -------------------------------------------------------------------------
+  # Test outputs that both containers can access
+  # workspace writes test scripts, playwright stores results
+
+  playwright_screenshots:
+    name: claude-playwright-screenshots
+    driver: local
+
+  playwright_videos:
+    name: claude-playwright-videos
+    driver: local
+
+  playwright_traces:
+    name: claude-playwright-traces
+    driver: local
+
+# ============================================================================
+# USAGE EXAMPLES
+# ============================================================================
+#
+# Start all services:
+#   docker-compose up -d
+#
+# View status:
+#   docker-compose ps
+#
+# View logs (all services):
+#   docker-compose logs -f
+#
+# View logs (specific service):
+#   docker-compose logs -f playwright
+#
+# Execute command in workspace:
+#   docker-compose exec workspace bash
+#   docker-compose exec workspace python --version
+#
+# Stop all services:
+#   docker-compose down
+#
+# Stop and remove volumes:
+#   docker-compose down -v
+#
+# Rebuild containers:
+#   docker-compose build --no-cache
+#   docker-compose up -d
+#
+# Check health status:
+#   docker-compose ps
+#   docker inspect claude-playwright --format='{{.State.Health.Status}}'
+#
+# Test connectivity:
+#   docker-compose exec workspace ping -c 2 playwright
+#   docker-compose exec workspace curl http://playwright:3000/health
+#
+# ============================================================================

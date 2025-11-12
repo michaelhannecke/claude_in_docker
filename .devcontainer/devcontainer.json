@@ -1,68 +1,67 @@
 {
   // ============================================================================
-  // DEVCONTAINER CONFIGURATION
+  // DEVCONTAINER CONFIGURATION - DOCKER COMPOSE MODE
   // ============================================================================
-  // This file defines a VS Code Development Container for AI/ML development
-  // with support for Docker testing and Playwright browser automation.
+  // This DevContainer uses Docker Compose to orchestrate multiple containers:
+  // 1. workspace: Main development environment (this container)
+  // 2. playwright: Browser automation service (separate container)
   //
-  // What is a DevContainer?
-  // - A Docker container optimized for development work
-  // - Provides consistent environment across team members
-  // - Includes all tools, dependencies, and configurations needed
-  // - Works with VS Code Remote - Containers extension
+  // Key changes from single-container setup:
+  // - Uses dockerComposeFile instead of image
+  // - Specifies which service to connect to
+  // - Volumes and networking handled by docker-compose.yml
+  // - Playwright service runs independently
   //
   // For more information: https://containers.dev/
   // ============================================================================
 
-  // Container display name shown in VS Code
-  "name": "AI/ML Development with Docker & Playwright",
+  // Container display name in VS Code
+  "name": "Claude Code - Multi-Container Development",
 
   // ============================================================================
-  // BASE IMAGE
+  // DOCKER COMPOSE CONFIGURATION
   // ============================================================================
-  // Official Microsoft Python 3.12 image based on Debian 11 (Bullseye)
-  //
-  // Why this image?
-  // - Pre-configured Python 3.12 installation
-  // - Includes common build tools (gcc, make, etc.)
-  // - Debian-based for stability and package availability
-  // - Maintained by Microsoft DevContainer team
-  // - Non-root user (vscode) pre-configured for security
-  //
-  // Alternative images:
-  // - python:3.12-slim (smaller, fewer tools)
-  // - ubuntu:22.04 (Ubuntu-based)
-  // - Custom image from your registry
+  // Instead of using "image", we use Docker Compose to manage multiple services
+  // VS Code will:
+  // 1. Run docker-compose up with this file
+  // 2. Connect to the specified service (workspace)
+  // 3. All containers defined in compose file will start
   // ============================================================================
-  "image": "mcr.microsoft.com/devcontainers/python:3.12-bullseye",
+
+  // Path to docker-compose.yml (relative to this file)
+  "dockerComposeFile": "docker-compose.yml",
+
+  // Which service to connect to (VS Code will attach to this container)
+  "service": "workspace",
+
+  // Workspace folder inside the container
+  // This should match the volume mount in docker-compose.yml
+  "workspaceFolder": "/workspaces/claude_in_devcontainer",
 
   // ============================================================================
-  // FEATURES - Modular Additions to Base Image
+  // OVERRIDE COMMAND
   // ============================================================================
-  // Features are pre-packaged scripts that install common tools and runtimes.
-  // They run during container build time and are maintained by the community.
+  // Set to true to use the command specified in docker-compose.yml
+  // (sleep infinity) instead of the Dockerfile CMD
+  // This keeps the container running so VS Code can connect
+  // ============================================================================
+  "overrideCommand": true,
+
+  // ============================================================================
+  // FEATURES - Modular Additions to Container
+  // ============================================================================
+  // Features are pre-packaged scripts that install tools and runtimes
+  // These run during container build time
   //
-  // Benefits:
-  // - Declarative and version-controlled
-  // - Maintained by community/Microsoft
-  // - Easier than writing custom Dockerfiles
-  // - Can be reused across projects
-  //
-  // Browse available features: https://containers.dev/features
+  // Note: These features are applied to the workspace service only
+  // The playwright service has its own Dockerfile
   // ============================================================================
   "features": {
     // -------------------------------------------------------------------------
     // Node.js Runtime
     // -------------------------------------------------------------------------
-    // Installs Node.js and npm for JavaScript/TypeScript development
-    //
-    // Why Node.js in a Python container?
-    // - Playwright (browser automation) requires Node.js
-    // - Many web development tools need npm
-    // - Frontend tooling (webpack, vite, etc.)
-    // - Package.json scripts for automation
-    //
-    // Version "22" = Node.js 22.x (LTS recommended)
+    // Installs Node.js 22 (LTS) and npm
+    // Required for JavaScript/TypeScript development and npm packages
     // -------------------------------------------------------------------------
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22"
@@ -72,103 +71,35 @@
     // GitHub CLI
     // -------------------------------------------------------------------------
     // Command-line tool for GitHub operations (gh command)
-    //
-    // Use cases:
-    // - Create/manage pull requests: gh pr create, gh pr view
-    // - Manage issues: gh issue list, gh issue create
-    // - Clone repositories: gh repo clone
-    // - Authenticate: gh auth login
-    // - CI/CD operations from command line
-    //
-    // SECURITY NOTE: Version pinned to "2.40.0" to prevent supply chain attacks
-    // Update this version intentionally after testing new releases
+    // Version pinned for security and reproducibility
     // -------------------------------------------------------------------------
     "ghcr.io/devcontainers/features/github-cli:1": {
-      "version": "2.40.0"
+      "version": "2.51.0"
     },
 
     // -------------------------------------------------------------------------
     // Docker-outside-of-Docker (DooD)
     // -------------------------------------------------------------------------
-    // Enables Docker CLI inside container to control HOST Docker daemon
-    //
-    // How it works:
-    // 1. Installs Docker CLI (docker, docker-compose) in container
-    // 2. Mounts host Docker socket (see "mounts" section below)
-    // 3. Containers you create are SIBLINGS to devcontainer, not children
-    // 4. All containers share the host Docker daemon
-    //
-    // Why Docker-outside-of-Docker vs Docker-in-Docker?
-    // ✅ DooD: No elevated privileges needed, faster, simpler
-    // ❌ DinD: Requires --privileged flag, slower, more complex
-    //
-    // Options explained:
-    // - moby: false → Use Docker CLI (not Moby engine)
-    // - installDockerBuildx: true → Multi-platform builds support
-    // - installDockerComposeSwitch: true → Install Compose v2
-    //
-    // Use cases:
-    // - Build Docker images: docker build -t myapp .
-    // - Test containerized apps: docker run -p 8080:8080 myapp
-    // - Use docker-compose for multi-container testing
-    // - CI/CD pipeline development
-    //
-    // SECURITY: This is safe because:
-    // - No --privileged flag required
-    // - No dangerous capabilities (SYS_ADMIN, etc.)
-    // - Host Docker daemon handles security policies
-    // - Better than mounting random host paths
+    // Enables Docker CLI in workspace container to control host Docker daemon
+    // Socket is mounted via docker-compose.yml volume
     // -------------------------------------------------------------------------
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-      "version": "latest",
-      "moby": false,
-      "installDockerBuildx": true,
-      "installDockerComposeSwitch": true
-    }
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
 
   // ============================================================================
   // POST-CREATE COMMAND
   // ============================================================================
-  // Script that runs ONCE after the container is created (not on every start)
+  // Script that runs ONCE after the container is created
+  // This is where heavy setup work happens (Python packages, venv, etc.)
   //
-  // When does this run?
-  // - First time opening project in container
-  // - After rebuilding the container
-  // - After changing devcontainer.json and rebuilding
-  //
-  // What does post-create.sh do?
-  // - Installs system packages (browsers, libraries)
-  // - Installs Python packages (uv pip install)
-  // - Installs npm packages globally
-  // - Downloads Playwright browsers
-  // - Creates project directories
-  // - Generates utility scripts and documentation
-  //
-  // Alternative commands:
-  // - Multiple commands: "postCreateCommand": "apt-get update && uv pip install -r requirements.txt"
-  // - JSON array: "postCreateCommand": ["uv", "pip", "install", "-r", "requirements.txt"]
-  // - Compound commands: "postCreateCommand": "command1 && command2 && command3"
-  //
-  // Troubleshooting:
-  // - Check logs in "Dev Containers" output panel
-  // - If it fails, container won't start properly
-  // - Add "set -e" in bash scripts to fail fast on errors
+  // Note: Uses workspace/post-create.sh (no browser dependencies)
   // ============================================================================
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postCreateCommand": "bash .devcontainer/workspace/post-create.sh",
 
   // ============================================================================
   // VS CODE CUSTOMIZATIONS
   // ============================================================================
-  // Extensions and settings specific to this devcontainer
-  //
-  // Benefits:
-  // - Consistent development environment for all team members
-  // - Extensions automatically installed when container starts
-  // - No manual setup required for new developers
-  // - Settings version-controlled with project
-  //
-  // Extensions installed here override user settings (for this container only)
+  // Extensions and settings for the development environment
   // ============================================================================
   "customizations": {
     "vscode": {
@@ -176,96 +107,65 @@
       // VS CODE EXTENSIONS
       // -----------------------------------------------------------------------
       // These extensions are automatically installed in the container
-      // Format: "publisher.extension-name"
-      // Find extensions: https://marketplace.visualstudio.com/vscode
       // -----------------------------------------------------------------------
       "extensions": [
         // AI/Coding Assistant
-        // - Claude Code: AI-powered coding assistant by Anthropic
-        // - Helps with code generation, refactoring, and debugging
         "anthropic.claude-code",
 
         // Python Development Stack
-        // - ms-python.python: Core Python extension (IntelliSense, debugging, linting)
-        // - vscode-pylance: Fast, feature-rich language server
-        // - debugpy: Python debugger for breakpoints and debugging
-        // - jupyter: Jupyter notebook support (interactive notebooks, kernel management)
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-python.debugpy",
         "ms-toolsai.jupyter",
 
         // Code Formatting & Linting
-        // - prettier-vscode: Auto-format JavaScript, TypeScript, JSON, Markdown
-        // - vscode-eslint: JavaScript/TypeScript linting
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
 
         // Git Integration
-        // - gitlens: Advanced Git visualization, blame, history
         "eamodio.gitlens",
 
         // Error/Warning Display
-        // - errorlens: Inline error/warning messages (very helpful!)
         "usernamehw.errorlens",
 
         // Container/Docker Support
-        // - vscode-docker: Manage Docker containers, images, registries from VS Code
         "ms-azuretools.vscode-docker",
 
-        // Quality of Life Improvements
-        // - code-spell-checker: Catch typos in comments and strings
-        // - path-intellisense: Autocomplete file paths in strings
-        // - vscode-todo-highlight: Highlight TODO, FIXME, NOTE comments
+        // Quality of Life
         "streetsidesoftware.code-spell-checker",
         "christian-kohler.path-intellisense",
         "wayou.vscode-todo-highlight",
 
         // UI Enhancements
-        // - material-icon-theme: Better file/folder icons in sidebar
         "pkief.material-icon-theme",
 
         // Browser Automation
-        // - playwright: Playwright Test runner integration, debugging, trace viewer
         "ms-playwright.playwright"
       ],
 
       // -----------------------------------------------------------------------
       // VS CODE SETTINGS
       // -----------------------------------------------------------------------
-      // These settings apply to this devcontainer only (not global user settings)
-      // -----------------------------------------------------------------------
       "settings": {
-        // Auto-format on save for all file types
+        // Auto-format on save
         "editor.formatOnSave": true,
 
-        // Default formatter (Prettier) for most languages
-        // Works for: JavaScript, TypeScript, JSON, Markdown, HTML, CSS, YAML
+        // Default formatter
         "editor.defaultFormatter": "esbenp.prettier-vscode",
 
-        // Python-specific formatter override
-        // Use Black (opinionated, deterministic Python formatter)
-        // Black formatting style: https://black.readthedocs.io/
+        // Python-specific formatter
         "[python]": {
           "editor.defaultFormatter": "ms-python.black-formatter"
         },
 
-        // Python interpreter path
-        // Points to Python 3.12 installed by base image
-        // Change if using virtual environments (venv, conda)
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        // Python interpreter path (virtual environment)
+        "python.defaultInterpreterPath": "/home/vscode/.venv/bin/python",
 
-        // Enable Python linting (code quality checks)
+        // Python linting
         "python.linting.enabled": true,
-
-        // Use pylint for linting
-        // Pylint checks: style, errors, code smells, refactoring suggestions
-        // Alternative linters: flake8, mypy, ruff
         "python.linting.pylintEnabled": true,
 
-        // Python formatting provider
-        // This is legacy setting (prefer editor.defaultFormatter)
-        // Kept for compatibility with older Python extension versions
+        // Python formatting
         "python.formatting.provider": "black"
       }
     }
@@ -275,298 +175,83 @@
   // REMOTE USER
   // ============================================================================
   // User account to use when connecting to the container
-  //
-  // Why "vscode" and not "root"?
-  // SECURITY: Running as non-root is a security best practice
-  // - Limits damage from compromised processes
-  // - Matches typical development workflows
-  // - Prevents accidental system modifications
-  // - Required by many security policies
-  //
-  // The "vscode" user is pre-configured in the base image with:
-  // - sudo access (for when you need it)
-  // - Proper permissions for development
-  // - Home directory at /home/vscode
-  // - Shell configured (bash with nice defaults)
-  //
-  // To switch to root: sudo -i
+  // Non-root user for security best practices
   // ============================================================================
   "remoteUser": "vscode",
-
-  // ============================================================================
-  // CONTAINER RUNTIME CONFIGURATION
-  // ============================================================================
-  // Additional arguments passed to "docker run" when starting the container
-  //
-  // SECURITY NOTES:
-  // ✅ SAFE: --shm-size=2gb (increases shared memory)
-  // ❌ REMOVED: --cap-add=SYS_ADMIN (container escape risk!)
-  // ❌ REMOVED: --ipc=host (breaks container isolation!)
-  //
-  // Why we removed dangerous flags:
-  // - SYS_ADMIN: Near-root privileges, can mount filesystems, escape container
-  // - ipc=host: Shares host IPC namespace, can access host shared memory
-  // - Neither is required for Playwright or Docker usage
-  // - Playwright uses --no-sandbox flag in browser launch args instead
-  //
-  // Why --shm-size=2gb is needed:
-  // - Chromium/Playwright need large shared memory for rendering
-  // - Default 64MB is too small for browser automation
-  // - 2GB is sufficient for most use cases
-  // - Prevents "Failed to create shared memory" errors
-  //
-  // Alternative if you need more: --shm-size=4gb
-  // ============================================================================
-  "runArgs": ["--shm-size=2gb"],
-
-  // ============================================================================
-  // ENVIRONMENT VARIABLES
-  // ============================================================================
-  // Environment variables set inside the container
-  // Available to all processes and shell sessions
-  //
-  // SECURITY WARNING: Never put secrets here!
-  // - This file is committed to version control
-  // - Use Docker secrets or .env files for sensitive data
-  // - Or use VS Code's secrets API
-  // ============================================================================
-  "containerEnv": {
-    // X11 Display for headless browser automation
-    // :99 is an arbitrary display number (99 chosen to avoid conflicts)
-    // Xvfb (virtual framebuffer) runs on this display
-    // Allows Chromium to render without physical display
-    "DISPLAY": ":99",
-
-    // Playwright browser download configuration
-    // "0" means DO download browsers during playwright install
-    // Set to "1" to skip browser downloads (if pre-cached)
-    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "0",
-
-    // Where Playwright stores downloaded browsers
-    // Mounted as volume (see "mounts") to persist across rebuilds
-    // Browsers are ~300MB each, so caching saves time
-    "PLAYWRIGHT_BROWSERS_PATH": "/home/vscode/.cache/ms-playwright"
-  },
 
   // ============================================================================
   // PORT FORWARDING
   // ============================================================================
   // Ports automatically forwarded from container to host
+  // These are defined in docker-compose.yml and will be auto-detected
   //
-  // How it works:
-  // - When app listens on these ports inside container
-  // - VS Code automatically forwards them to localhost
-  // - Access via http://localhost:3000 from your browser
-  // - Shows notification when port is auto-forwarded
-  //
-  // Common port assignments:
-  // - 3000-3001: React, Next.js, Node.js apps
+  // Common port usage:
+  // - 3001: Node.js, React, Next.js
   // - 4000: GraphQL servers
   // - 5000: Flask, Python web apps
-  // - 5173-5174: Vite dev servers
-  // - 8000: FastAPI, Django, Python web servers
-  // - 8080-8081: Alternative HTTP ports, proxy servers
-  // - 9000: PHP servers, management UIs
-  //
-  // Forwarding happens automatically - no configuration needed!
-  // You can manually forward additional ports from VS Code UI
-  //
-  // SECURITY: Forwarded ports only accessible from host, not network
-  // To expose to network, use docker run -p or configure in runArgs
+  // - 5173: Vite dev server
+  // - 8000: FastAPI, Django
+  // - 8080: Alternative HTTP
+  // - 8888: Jupyter Lab
   // ============================================================================
-  "forwardPorts": [3000, 3001, 4000, 5000, 5173, 5174, 8000, 8080, 8081, 9000],
+  "forwardPorts": [3001, 4000, 5000, 5173, 8000, 8080, 8888],
 
   // ============================================================================
-  // VOLUME MOUNTS
+  // DOCKER COMPOSE SPECIFIC SETTINGS
   // ============================================================================
-  // Mount points for persistent data and host resources
-  //
-  // Types of mounts:
-  // 1. Named volumes (type=volume): Docker-managed, persist across rebuilds
-  // 2. Bind mounts (type=bind): Direct access to host filesystem
-  //
-  // Volume name variables:
-  // - ${localWorkspaceFolderBasename}: Your project folder name (e.g., "my-app")
-  // - ${containerWorkspaceFolder}: Mount path in container (usually /workspaces/my-app)
-  //
-  // Why use volumes instead of bind mounts for some paths?
-  // - Performance: Volumes are faster on macOS/Windows
-  // - Isolation: Prevent host/container file permission issues
-  // - Persistence: Data survives container deletion
-  // - Cleanup: Docker can manage volume lifecycle
+  // Additional settings for Docker Compose mode
   // ============================================================================
-  "mounts": [
-    // -------------------------------------------------------------------------
-    // Node Modules Volume
-    // -------------------------------------------------------------------------
-    // Stores node_modules in Docker volume instead of project folder
-    //
-    // Why?
-    // - PERFORMANCE: Much faster on macOS/Windows (10-100x)
-    // - Avoids file watching issues with npm packages
-    // - Prevents host/container binary incompatibility
-    // - Packages with native bindings work correctly
-    //
-    // Trade-off:
-    // - node_modules not visible on host filesystem
-    // - Use "npm ls" inside container to inspect packages
-    // - IDE can still resolve imports (uses container FS)
-    //
-    // To clear: docker volume rm <volume-name>
-    // -------------------------------------------------------------------------
-    "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
 
-    // -------------------------------------------------------------------------
-    // Playwright Browser Cache Volume
-    // -------------------------------------------------------------------------
-    // Stores downloaded Chromium/Firefox/WebKit browsers
-    //
-    // Why?
-    // - Browsers are ~300MB each
-    // - Avoid re-downloading on every rebuild
-    // - Persist across container rebuilds
-    // - Shared across all containers (if using same volume name)
-    //
-    // Location matches PLAYWRIGHT_BROWSERS_PATH env variable
-    // First install takes 2-5 minutes, subsequent starts are instant
-    // -------------------------------------------------------------------------
-    "source=${localWorkspaceFolderBasename}-playwright-cache,target=/home/vscode/.cache/ms-playwright,type=volume",
-
-    // -------------------------------------------------------------------------
-    // Docker Socket Mount (BIND MOUNT)
-    // -------------------------------------------------------------------------
-    // Mounts host Docker socket into container for Docker-outside-of-Docker
-    //
-    // CRITICAL: This is a BIND MOUNT of /var/run/docker.sock
-    //
-    // What this enables:
-    // ✅ Run "docker" commands inside container
-    // ✅ Build Docker images
-    // ✅ Start/stop containers
-    // ✅ Use docker-compose
-    // ✅ All without --privileged flag
-    //
-    // How it works:
-    // - Container gets Docker CLI (installed by feature above)
-    // - CLI talks to HOST Docker daemon via this socket
-    // - Containers you create are siblings, not children
-    // - Host Docker daemon does all the work
-    //
-    // SECURITY IMPLICATIONS:
-    // ⚠️  Access to Docker socket = root-equivalent access
-    // ⚠️  Can create privileged containers
-    // ⚠️  Can mount any host path
-    // ⚠️  Can inspect all containers
-    //
-    // Why this is acceptable for development:
-    // ✅ Better than --privileged flag (DinD)
-    // ✅ Better than mounting host directories directly
-    // ✅ Standard practice for devcontainers
-    // ✅ Host Docker daemon enforces security policies
-    //
-    // DO NOT USE in production or untrusted environments!
-    //
-    // Alternative approaches:
-    // - Docker-in-Docker (DinD): Requires --privileged, more isolated
-    // - Rootless Docker: More secure but complex setup
-    // - Remote Docker daemon: Network-based connection
-    // -------------------------------------------------------------------------
-    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
-  ],
+  // Run docker-compose down when VS Code closes (default behavior)
+  // Options: "none" (leave running) or "stopCompose" (stop all services)
+  "shutdownAction": "stopCompose",
 
   // ============================================================================
-  // HOST REQUIREMENTS
+  // REMOVED SETTINGS (Now in docker-compose.yml)
   // ============================================================================
-  // Minimum resources required on host machine
+  // These settings were moved to docker-compose.yml:
+  // - runArgs (now in service definition)
+  // - mounts (now in volumes section)
+  // - containerEnv (now in environment section)
   //
-  // VS Code will warn if host doesn't meet these requirements
-  // These are minimums - more is better for AI/ML workloads
-  //
-  // Resource guidance by use case:
-  //
-  // Web Development:
-  // - CPUs: 2, Memory: 4GB, Storage: 20GB
-  //
-  // AI/ML Development (current config):
-  // - CPUs: 2 (minimum), 4-8 recommended for training
-  // - Memory: 4GB (minimum), 8-16GB recommended for models
-  // - Storage: 32GB (minimum), 50GB+ for datasets
-  //
-  // Heavy ML Training:
-  // - CPUs: 8+
-  // - Memory: 16-32GB
-  // - Storage: 100GB+
-  // - Consider GPU support (requires additional config)
-  //
-  // Browser Automation (Playwright):
-  // - CPUs: 2+ (browsers are CPU-intensive)
-  // - Memory: 4GB+ (multiple browser instances)
-  // - Storage: 20GB+ (browser binaries ~300MB each)
-  //
-  // Docker Testing:
-  // - CPUs: 2+ (containers need resources)
-  // - Memory: 4GB+ (depends on containers)
-  // - Storage: 32GB+ (images and containers)
-  //
-  // PERFORMANCE TIP:
-  // On macOS/Windows, increase Docker Desktop resources in:
-  // Settings → Resources → Advanced
-  // - Set higher CPU/Memory limits
-  // - Enable "Use Virtualization framework" for better performance
-  // - Consider using WSL2 on Windows for 10x performance boost
+  // Why moved?
+  // - Better organization in compose file
+  // - Shared configuration between services
+  // - Easier to manage multi-container setup
+  // - Standard Docker Compose patterns
   // ============================================================================
-  "hostRequirements": {
-    // Minimum CPU cores
-    // Note: These are logical cores (threads), not physical cores
-    // Docker Desktop must be configured to allow this many cores
-    "cpus": 2,
-
-    // Minimum RAM
-    // Note: This is total container limit, not reserved memory
-    // Host needs additional RAM for OS and other apps
-    // Recommended: 2x this amount on host (8GB host for 4GB container)
-    "memory": "4gb",
-
-    // Minimum free disk space
-    // Includes: base image, layers, volumes, containers
-    // This is consumed space, not reserved space
-    // Docker images are layered - shared layers save space
-    "storage": "32gb"
-  }
 
   // ============================================================================
-  // ADDITIONAL CONFIGURATION OPTIONS (Not Used Here)
+  // NOTES FOR MULTI-CONTAINER SETUP
   // ============================================================================
-  // These are commented out but available if needed:
+  // Important differences from single-container:
   //
-  // "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}"
-  // → Where to mount your code (default is fine)
+  // 1. Container Communication:
+  //    - Workspace can reach playwright via: http://playwright:3000
+  //    - Docker Compose provides internal DNS
+  //    - No need for host networking
   //
-  // "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind"
-  // → How to mount workspace (default is fine)
+  // 2. Startup Order:
+  //    - Playwright service starts first
+  //    - Health check must pass
+  //    - Then workspace service starts
+  //    - VS Code connects to workspace
   //
-  // "shutdownAction": "stopContainer"
-  // → What to do on VS Code close (default: stop, alternative: none)
+  // 3. Volume Management:
+  //    - Named volumes for persistence
+  //    - Shared volumes for artifacts
+  //    - Bind mount for source code
   //
-  // "updateContentCommand": "uv pip install -r requirements.txt"
-  // → Runs on every container start (different from postCreateCommand)
+  // 4. Rebuilding:
+  //    - docker-compose build              (rebuild all)
+  //    - docker-compose build workspace    (rebuild workspace only)
+  //    - docker-compose build playwright   (rebuild playwright only)
   //
-  // "initializeCommand": "echo Starting..."
-  // → Runs on HOST before starting container
+  // 5. Debugging:
+  //    - docker-compose ps                 (check status)
+  //    - docker-compose logs -f            (follow logs)
+  //    - docker-compose logs playwright    (playwright logs)
+  //    - docker exec claude-workspace bash (shell in workspace)
   //
-  // "overrideCommand": false
-  // → Override image CMD (usually not needed)
-  //
-  // "privileged": true
-  // → Run container in privileged mode (AVOID - security risk!)
-  //
-  // "capAdd": ["SYS_PTRACE"]
-  // → Add specific Linux capabilities (use sparingly)
-  //
-  // "securityOpt": ["seccomp=unconfined"]
-  // → Disable security features (AVOID unless debugging)
-  //
-  // For complete reference:
-  // https://containers.dev/implementors/json_reference/
   // ============================================================================
 }
