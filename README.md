@@ -1,5 +1,11 @@
 # Claude Code in Docker - Multi-Container DevContainer
 
+<div align="center">
+
+![Claude Code in DevContainer](data/claude-in-devcontainer-cosy.png)
+
+</div>
+
 A production-ready VS Code DevContainer specifically designed for **Claude Code integration**, using a **modular multi-container architecture** with Docker Compose. Provides a fully-configured development environment with Python, Jupyter, Docker support, and remote browser automation capabilities.
 
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Integrated-blueviolet?logo=anthropic)](https://claude.com/claude-code)
@@ -132,7 +138,8 @@ Perfect for:
 
 ### Claude Code Integration
 
-- **🤖 Anthropic Claude Code** - Pre-installed AI coding assistant in workspace
+- **🤖 Anthropic Claude Code** - Pre-installed AI coding assistant (VS Code extension + CLI)
+- **💻 Claude Code CLI** - Command-line interface for Claude (`claude` command)
 - **🔌 Full VS Code Extension** - Seamless integration with the IDE
 - **🐳 Multi-Container Environment** - Workspace and browser services isolated
 - **📦 All Dependencies Included** - Python, Node.js, Git, remote Playwright client
@@ -141,6 +148,7 @@ Perfect for:
 ### Supporting Development Tools
 
 **Workspace Service:**
+- **Claude Code CLI** - Command-line interface for AI assistance (`@anthropic/claude-code`)
 - **Python 3.12** - With pip, ipython, black, pylint for code quality
 - **Jupyter Ecosystem** - JupyterLab, Jupyter Notebook, IPython kernel, ipywidgets
 - **Node.js 22 LTS** - For JavaScript/TypeScript development and tooling
@@ -240,6 +248,9 @@ Pre-configured client library and tools for remote browser automation:
    ```bash
    # Check services are running
    docker-compose ps  # Should show both services healthy
+
+   # Check Claude Code CLI
+   claude --version  # Should show Claude Code version
 
    # Check Python
    python --version  # Should show Python 3.12.x
@@ -559,12 +570,13 @@ git push
 
 ### Workspace Service Environment
 
-| Tool    | Version  | Purpose                           |
-| ------- | -------- | --------------------------------- |
-| Python  | 3.12     | Core programming language         |
-| Node.js | 22 (LTS) | JavaScript runtime                |
-| uv      | Latest   | Fast Python package manager       |
-| Docker  | Latest   | Container operations (DooD)       |
+| Tool        | Version  | Purpose                           |
+| ----------- | -------- | --------------------------------- |
+| Claude Code | Latest   | AI coding assistant CLI           |
+| Python      | 3.12     | Core programming language         |
+| Node.js     | 22 (LTS) | JavaScript runtime                |
+| uv          | Latest   | Fast Python package manager       |
+| Docker      | Latest   | Container operations (DooD)       |
 
 ### Playwright Service Environment
 
@@ -580,37 +592,37 @@ git push
 **Core Data Science & ML:**
 
 ```python
-jupyter>=1.1.1            # Jupyter metapackage
-jupyterlab==4.4.10        # JupyterLab IDE
-notebook==7.4.7           # Jupyter Notebook
-ipython==9.6.0            # Interactive Python shell
-ipykernel==7.1.0          # IPython kernel for Jupyter
-ipywidgets==8.1.8         # Interactive widgets
+jupyter>=1.1.1            # Jupyter metapackage (installed from pyproject.toml)
+# Jupyter dependencies are auto-installed, including:
+# - jupyterlab (latest compatible)
+# - notebook (latest compatible)
+# - ipython (see below)
+# - ipykernel (latest compatible)
+# - ipywidgets (latest compatible)
 ```
 
-**Remote Browser Automation (Workspace - Pinned Versions):**
+**Workspace Development Tools (Pinned Versions):**
 
 ```python
+# Remote Browser Automation
 playwright==1.55.0        # Playwright client library (no browsers)
 requests==2.31.0          # HTTP client for API communication
 pytest==7.4.3             # Testing framework
-```
+pytest-playwright==0.7.1  # Playwright pytest plugin
 
-**Note:** Browser binaries and automation engine run in the separate Playwright service.
-
-**Code Quality:**
-
-```python
+# Code Quality
 black==23.12.1            # Code formatter
 pylint==3.0.3             # Code linter
-```
 
-**Data Science Tools:**
-
-```python
+# Data Science
 numpy==1.26.2             # Numerical computing
 pandas==2.3.3             # Data manipulation
+
+# Interactive Shell
+ipython==8.18.1           # Enhanced Python shell
 ```
+
+**Note:** Browser binaries and automation engine run in the separate Playwright service, not in the workspace.
 
 ### System Libraries
 
@@ -697,7 +709,40 @@ All package versions are pinned to prevent:
 
 ## 💡 Usage Examples
 
-### Example 1: Multi-Container Management
+### Example 1: Claude Code CLI
+
+**Interactive AI assistance from the command line:**
+
+```bash
+# Check Claude Code version
+claude --version
+
+# Start interactive session
+claude
+
+# Ask Claude for help with code
+claude "explain this Python function"
+
+# Get code review assistance
+claude "review my code for potential bugs"
+
+# Generate code snippets
+claude "create a Python function to validate email addresses"
+```
+
+**Use Claude Code with files:**
+
+```bash
+# Analyze a specific file
+claude "explain what this code does" < main.py
+
+# Get suggestions for improvements
+claude "suggest optimizations" < src/model.py
+```
+
+**Note:** The Claude Code CLI provides the same AI assistance as the VS Code extension but from the command line, useful for quick queries and automation.
+
+### Example 2: Multi-Container Management
 
 **View running services:**
 
@@ -719,7 +764,7 @@ docker-compose down
 docker-compose up --build
 ```
 
-### Example 2: Jupyter Notebooks
+### Example 3: Jupyter Notebooks
 
 **Start JupyterLab:**
 
@@ -751,7 +796,7 @@ source ~/.venv/bin/activate
 ipython
 ```
 
-### Example 3: Python Data Science
+### Example 4: Python Data Science
 
 ```python
 # Create a new Python script or Jupyter notebook
@@ -767,7 +812,7 @@ data = pd.DataFrame({
 print(data.describe())
 ```
 
-### Example 4: Remote Playwright Browser Automation
+### Example 5: Remote Playwright Browser Automation
 
 **Basic screenshot using remote service:**
 
@@ -814,7 +859,7 @@ python examples/03_ui_optimizer_full.py https://example.com
 - Performance metrics
 - All browser operations isolated in separate container
 
-### Example 5: Docker Container Testing
+### Example 6: Docker Container Testing
 
 ```bash
 # Build a Docker image
@@ -834,7 +879,7 @@ docker stop $(docker ps -q)
 docker system prune -f
 ```
 
-### Example 6: Using Claude Code (Primary Use Case)
+### Example 7: Using Claude Code (Primary Use Case)
 
 **In VS Code:**
 
@@ -847,8 +892,11 @@ docker system prune -f
 **From Terminal:**
 
 ```bash
-# Start Claude Code CLI
-claude-code
+# Start Claude Code CLI (interactive mode)
+claude
+
+# Or get help with a specific task
+claude "explain this function"
 
 # Claude Code can now assist with:
 # - Writing Python code and Jupyter notebooks
@@ -866,7 +914,7 @@ Running Claude Code in a DevContainer provides:
 - **Full Toolchain Access** - Python, Docker, Jupyter, Playwright all available to Claude
 - **Reproducible Results** - Share the entire environment with teammates
 
-### Example 7: GitHub CLI Operations
+### Example 8: GitHub CLI Operations
 
 ```bash
 # Authenticate

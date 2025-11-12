@@ -49,7 +49,7 @@ LABEL version="1.0.0"
 # Note: No browser dependencies! Those are in the playwright service
 # ============================================================================
 RUN apt-get update && apt-get install -y \
-    # Network utilities
+    # Network utilities (needed for Node.js install script)
     curl \
     wget \
     # Version control
@@ -62,6 +62,16 @@ RUN apt-get update && apt-get install -y \
     iputils-ping \
     dnsutils \
     # Clean up
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================================
+# INSTALL NODE.JS (REQUIRED FOR CLAUDE CODE CLI)
+# ============================================================================
+# Install Node.js 22 LTS from NodeSource repository
+# This is more reliable than using DevContainer features in Docker Compose mode
+# ============================================================================
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # ============================================================================

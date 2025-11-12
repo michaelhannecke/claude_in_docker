@@ -99,6 +99,27 @@ docker system prune -f
 
 **Note**: Docker commands control the HOST Docker daemon (Docker-outside-of-Docker setup). Containers you create are siblings to the devcontainer services, not children.
 
+### Claude Code CLI
+
+```bash
+# Check Claude Code version
+claude --version
+
+# Start interactive Claude Code session
+claude
+
+# Get help
+claude --help
+
+# Run Claude Code with a specific prompt
+claude "explain this code"
+
+# Use Claude Code for code review
+claude review
+```
+
+**Note**: The Claude Code CLI is installed globally via npm during the post-create script and is available immediately in the workspace container.
+
 ### Playwright Browser Automation (Remote Service)
 
 ```bash
@@ -183,7 +204,7 @@ This project uses Docker Compose to run two separate services:
 │  │ Workspace Service (claude-workspace)           │    │
 │  │                                                 │    │
 │  │ • Python 3.12, Jupyter, Node.js 22             │    │
-│  │ • Docker CLI (DooD), GitHub CLI                │    │
+│  │ • Claude Code CLI, Docker CLI, GitHub CLI      │    │
 │  │ • Playwright CLIENT library                    │    │
 │  │ • NO browsers (clean environment)              │    │
 │  │ • Resources: 2-4 CPUs, 4-8GB RAM              │    │
@@ -488,6 +509,9 @@ On macOS/Windows, increase Docker Desktop resources in Settings → Resources.
 
 All packages are pinned for security. Update intentionally:
 
+**Node.js packages** (in `workspace/post-create.sh`):
+- @anthropic-ai/claude-code (latest) - Claude Code CLI
+
 **Python packages** (in `workspace/post-create.sh`):
 - playwright==1.55.0 (client library only, no browsers)
 - pytest==7.4.3
@@ -600,6 +624,10 @@ docker-compose logs --tail=50 playwright
 
 **Most Common Commands**:
 ```bash
+# Claude Code CLI
+claude --version
+claude "help me with this code"
+
 # Python work
 source ~/.venv/bin/activate
 python script.py

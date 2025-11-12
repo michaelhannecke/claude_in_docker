@@ -52,6 +52,14 @@ print_error() {
 }
 
 # ============================================================================
+# ENVIRONMENT SETUP
+# ============================================================================
+# Node.js is installed globally in the Dockerfile
+# So npm should be available in PATH by default
+# Add common NVM paths as fallback for compatibility
+export PATH="/usr/local/share/nvm/current/bin:$PATH"
+
+# ============================================================================
 # HEADER
 # ============================================================================
 echo ""
@@ -71,21 +79,81 @@ if command -v uv &> /dev/null; then
 else
     # Install uv
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    export PATH="$HOME/.cargo/bin:$PATH"
+    # Add uv to PATH (installs to ~/.local/bin)
+    export PATH="$HOME/.local/bin:$PATH"
     print_success "uv installed: $(uv --version)"
 fi
 
 # ============================================================================
-# SECTION 2: CREATE PYTHON VIRTUAL ENVIRONMENT
+# SECTION 2: FIX UV CACHE PERMISSIONS
+# ============================================================================
+print_status "Ensuring proper permissions for uv cache..."
+
+# The uv cache directory can sometimes be created with wrong ownership
+# (e.g., by root during previous container runs). Fix this proactively.
+UV_CACHE_DIR="$HOME/.cache/uv"
+
+if [ -d "$UV_CACHE_DIR" ]; then
+    # Check if we can write to the cache directory
+    if [ ! -w "$UV_CACHE_DIR" ]; then
+        print_warning "UV cache has incorrect permissions"
+        # Try to remove it, but don't fail if it's busy/mounted
+        rm -rf "$UV_CACHE_DIR" 2>/dev/null || {
+            # If removal fails (e.g., device busy), try to fix ownership instead
+            print_warning "Cannot remove cache (device busy), attempting to fix ownership..."
+            sudo chown -R vscode:vscode "$UV_CACHE_DIR" 2>/dev/null || true
+        }
+    fi
+fi
+
+# Ensure cache directory exists with correct ownership
+mkdir -p "$UV_CACHE_DIR" 2>/dev/null || true
+print_success "UV cache directory ready"
+
+# ============================================================================
+# SECTION 3: CREATE PYTHON VIRTUAL ENVIRONMENT
 # ============================================================================
 print_status "Creating Python virtual environment..."
 
 # Use venv directory that's mounted as a Docker volume for persistence
 VENV_PATH="$HOME/.venv"
 
+# Fix permissions on venv directory (Docker volume may be created with wrong ownership)
 if [ -d "$VENV_PATH" ]; then
-    print_warning "Virtual environment already exists at $VENV_PATH"
+    # Check if we can write to the venv directory
+    if [ ! -w "$VENV_PATH" ]; then
+        print_warning "VENV directory has incorrect permissions, fixing..."
+        sudo chown -R vscode:vscode "$VENV_PATH" 2>/dev/null || true
+        print_success "VENV permissions fixed"
+    fi
+fi
+
+# Check if venv exists and is valid
+if [ -d "$VENV_PATH" ] && [ -f "$VENV_PATH/bin/activate" ] && [ -x "$VENV_PATH/bin/python3" ]; then
+    # Verify the Python interpreter is not a broken symlink
+    if "$VENV_PATH/bin/python3" --version &> /dev/null; then
+        print_warning "Virtual environment already exists at $VENV_PATH"
+    else
+        # Python interpreter is broken - recreate venv
+        print_warning "Virtual environment has broken Python symlink, recreating..."
+        sudo chown -R vscode:vscode "$VENV_PATH" 2>/dev/null || true
+        rm -rf "$VENV_PATH"/* "$VENV_PATH"/.[!.]* 2>/dev/null || true
+        uv venv "$VENV_PATH"
+        print_success "Virtual environment recreated at $VENV_PATH"
+    fi
+elif [ -d "$VENV_PATH" ]; then
+    # Directory exists but is corrupted - clear contents and recreate
+    # NOTE: $VENV_PATH is a Docker volume mount point, so we can't remove the directory itself
+    print_warning "Clearing corrupted virtual environment at $VENV_PATH"
+    # Ensure we have write permissions first
+    sudo chown -R vscode:vscode "$VENV_PATH" 2>/dev/null || true
+    rm -rf "$VENV_PATH"/* "$VENV_PATH"/.[!.]* 2>/dev/null || true
+    uv venv "$VENV_PATH"
+    print_success "Virtual environment created at $VENV_PATH"
 else
+    # Create new venv directory with correct permissions
+    mkdir -p "$VENV_PATH"
+    sudo chown -R vscode:vscode "$VENV_PATH" 2>/dev/null || true
     uv venv "$VENV_PATH"
     print_success "Virtual environment created at $VENV_PATH"
 fi
@@ -94,7 +162,7 @@ fi
 source "$VENV_PATH/bin/activate"
 
 # ============================================================================
-# SECTION 3: INSTALL PYTHON PACKAGES
+# SECTION 4: INSTALL PYTHON PACKAGES
 # ============================================================================
 print_status "Installing Python packages..."
 
@@ -104,6 +172,10 @@ print_status "Installing Python packages..."
 # - Set PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 to skip browser download
 
 export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+
+# Suppress uv hardlink warning in Docker environments
+# (cache and venv are often on different filesystems)
+export UV_LINK_MODE=copy
 
 # Install packages with pinned versions (security)
 uv pip install \
@@ -125,7 +197,37 @@ uv pip install -e .
 print_success "Python packages installed"
 
 # ============================================================================
-# SECTION 4: CONFIGURE SHELL
+# SECTION 5: INSTALL CLAUDE CODE CLI
+# ============================================================================
+print_status "Installing Claude Code CLI..."
+
+# Check if npm is available
+if ! command -v npm &> /dev/null; then
+    print_error "npm not found in PATH"
+    print_warning "Skipping Claude Code CLI installation"
+    print_warning "After container starts, you can install manually with:"
+    print_warning "  sudo npm install -g @anthropic-ai/claude-code"
+else
+    print_success "npm is available: $(npm --version)"
+
+    # Check if claude is already installed
+    if command -v claude &> /dev/null; then
+        print_success "Claude Code already installed: $(claude --version)"
+    else
+        # Install Claude Code globally via npm
+        print_status "Installing @anthropic-ai/claude-code via npm..."
+        sudo npm install -g @anthropic-ai/claude-code
+
+        if command -v claude &> /dev/null; then
+            print_success "Claude Code installed: $(claude --version)"
+        else
+            print_warning "Claude Code installation completed but 'claude' command not found"
+        fi
+    fi
+fi
+
+# ============================================================================
+# SECTION 6: CONFIGURE SHELL
 # ============================================================================
 print_status "Configuring shell..."
 
@@ -145,8 +247,16 @@ if ! grep -q "PLAYWRIGHT_SERVICE_URL" ~/.bashrc; then
     print_success "Added PLAYWRIGHT_SERVICE_URL to environment"
 fi
 
+# Add UV_LINK_MODE to .bashrc
+if ! grep -q "UV_LINK_MODE" ~/.bashrc; then
+    echo "" >> ~/.bashrc
+    echo "# Suppress uv hardlink warning (Docker/different filesystems)" >> ~/.bashrc
+    echo "export UV_LINK_MODE=copy" >> ~/.bashrc
+    print_success "Added UV_LINK_MODE to environment"
+fi
+
 # ============================================================================
-# SECTION 5: CREATE PLAYWRIGHT CLIENT UTILITIES
+# SECTION 7: CREATE PLAYWRIGHT CLIENT UTILITIES
 # ============================================================================
 print_status "Creating Playwright client utilities..."
 
@@ -403,7 +513,7 @@ chmod +x /workspaces/claude_in_devcontainer/web-ui-optimizer/connection.py
 print_success "Created connection.py"
 
 # ============================================================================
-# SECTION 6: VERIFY PLAYWRIGHT SERVICE CONNECTIVITY
+# SECTION 8: VERIFY PLAYWRIGHT SERVICE CONNECTIVITY
 # ============================================================================
 print_status "Verifying Playwright service connectivity..."
 
@@ -420,7 +530,7 @@ else
 fi
 
 # ============================================================================
-# SECTION 7: SUMMARY
+# SECTION 9: SUMMARY
 # ============================================================================
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -429,6 +539,9 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 print_status "Environment:"
 echo "  • Python: $(python --version)"
+echo "  • Node.js: $(node --version 2>/dev/null || echo 'not found')"
+echo "  • npm: $(npm --version 2>/dev/null || echo 'not found')"
+echo "  • Claude Code: $(claude --version 2>/dev/null || echo 'not installed')"
 echo "  • Virtual env: $VENV_PATH"
 echo "  • Playwright service: \$PLAYWRIGHT_SERVICE_URL"
 echo ""
