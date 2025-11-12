@@ -7,3 +7,10 @@ requires-python = ">=3.12"
 dependencies = [
     "jupyter>=1.1.1",
 ]
+
+[tool.setuptools]
+# Exclude non-Python directories from package discovery
+packages = []
+
+[tool.setuptools.package-data]
+# If you have Python packages in the future, list them explicitly here
