@@ -387,7 +387,7 @@ Create your project structure:
 
 ```bash
 # Activate the virtual environment
-source .venv/bin/activate
+source ~/.venv/bin/activate
 
 # Create your project structure
 mkdir -p src tests notebooks data
@@ -410,7 +410,7 @@ mkdir -p src tests notebooks data
 
 ```bash
 # Activate virtual environment
-source .venv/bin/activate
+source ~/.venv/bin/activate
 
 # Install your project in editable mode
 uv pip install -e .
@@ -437,7 +437,7 @@ echo "*.pkl" >> .gitignore
 
 - `.devcontainer/` - DevContainer configuration
 - `.gitignore` - Git ignore rules
-- `.venv/` - Virtual environment (auto-generated)
+- `~/.venv/` - Virtual environment (auto-generated, in home directory)
 - `pyproject.toml` - Customize for your project
 - `uv.lock` - Dependency lock file (auto-generated)
 
@@ -513,7 +513,7 @@ code .
 # Click "Reopen in Container"
 
 # 3. Once container is ready, customize
-source .venv/bin/activate
+source ~/.venv/bin/activate
 
 # 4. Update project files
 cat > pyproject.toml << 'EOF'
@@ -903,8 +903,7 @@ gh repo clone username/repo
 │   ├── __init__.py                     # Package exports
 │   ├── remote_playwright.py            # HTTP client library (414 lines)
 │   ├── connection.py                   # Connection utilities (213 lines)
-│   ├── ui_optimizer.py                 # UI testing toolkit (remote)
-│   └── ui_optimizer.py.original        # Original version (backup)
+│   └── ui_optimizer.py                 # UI testing toolkit (remote)
 ├── examples/
 │   ├── README.md                       # Examples documentation
 │   ├── 01_basic_screenshot.py          # Basic usage example
@@ -916,8 +915,6 @@ gh repo clone username/repo
 ├── uv.lock                             # Locked dependencies
 ├── test.ipynb                          # Example Jupyter notebook
 ├── CLAUDE.md                           # Architecture guide for Claude Code
-├── ARCHITECTURE_PLAN.md                # Detailed architecture design
-├── IMPLEMENTATION_STEPS.md             # Implementation guide
 └── README.md                           # This file
 ```
 
@@ -945,13 +942,13 @@ dependencies = [
 Then install with uv:
 
 ```bash
-source .venv/bin/activate
+source ~/.venv/bin/activate
 uv pip install -e .
 ```
 
 **Or using post-create.sh:**
 
-Edit `.devcontainer/post-create.sh` (line 205):
+Edit `.devcontainer/workspace/post-create.sh`:
 
 ```bash
 uv pip install \
@@ -1287,15 +1284,12 @@ docker-compose restart playwright
 This repository contains **700+ lines of detailed documentation** in configuration files:
 
 - **devcontainer.json** (570 lines) - Every configuration option explained
-- **post-create.sh** (1100+ lines) - Step-by-step setup documentation
+- **workspace/post-create.sh** (1100+ lines) - Step-by-step setup documentation
 
 ### Project Documentation
 
 - **CLAUDE.md** - Architecture guide for Claude Code instances
-- **ARCHITECTURE_PLAN.md** - Detailed multi-container design
-- **IMPLEMENTATION_STEPS.md** - Step-by-step implementation guide
 - **examples/README.md** - Remote Playwright usage examples
-- **STEP1_COMPLETED.md**, **STEP2_COMPLETED.md**, **STEP3_COMPLETED.md** - Implementation progress
 
 ### Learning Resources
 
@@ -1438,8 +1432,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For detailed information about the multi-container architecture:
 
 - **Quick Start**: See [Quick Start](#-quick-start) section above
-- **Architecture Design**: Read `ARCHITECTURE_PLAN.md` for complete technical design
-- **Implementation Guide**: See `IMPLEMENTATION_STEPS.md` for step-by-step breakdown
 - **Examples**: Check `examples/README.md` for remote Playwright usage
 - **Claude Guide**: Read `CLAUDE.md` for architecture overview for AI assistants
 
