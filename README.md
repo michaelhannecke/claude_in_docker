@@ -6,7 +6,7 @@
 
 </div>
 
-A production-ready VS Code DevContainer specifically designed for **Claude Code integration**, using a **modular multi-container architecture** with Docker Compose. Provides a fully-configured development environment with Python, Jupyter, Docker support, and remote browser automation capabilities.
+A production-ready VS Code DevContainer specifically designed for **Claude Code integration**, using a **config-driven modular multi-container architecture** with Docker Compose. Provides a fully-configured development environment with Python, Jupyter, Docker support, and **optional services** that can be easily enabled/disabled via configuration file.
 
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Integrated-blueviolet?logo=anthropic)](https://claude.com/claude-code)
 [![DevContainer](https://img.shields.io/badge/Dev%20Container-Ready-blue?logo=docker)](https://containers.dev/)
@@ -19,6 +19,7 @@ A production-ready VS Code DevContainer specifically designed for **Claude Code 
 ## 📚 Table of Contents
 
 - [Overview](#-overview)
+- [Service Configuration](#-service-configuration-new) ⭐ **NEW**
 - [Why Claude Code in Docker?](#-why-claude-code-in-docker)
 - [Features](#-features)
 - [Quick Start](#-quick-start)
@@ -57,7 +58,84 @@ This repository demonstrates **how to run Claude Code in a multi-container Docke
 ✅ **Pre-configured Tools** - Python, Jupyter, Docker, and remote Playwright ready to use
 ✅ **Security Focused** - Service boundaries, hardened configuration, minimal attack surface
 ✅ **Cross-Platform** - Works identically on Windows, macOS, and Linux
-✅ **One-Click Setup** - Docker Compose starts all services automatically
+✅ **Config-Driven** - Enable/disable services with a simple configuration file ⭐ **NEW**
+
+---
+
+## ⚙️ Service Configuration **NEW**
+
+### Quick Start: Enable/Disable Services
+
+This DevContainer uses a **config-driven architecture** where optional services can be easily enabled or disabled:
+
+**1. Edit `.devcontainer/.env`:**
+
+```bash
+# Enable browser automation
+ENABLE_PLAYWRIGHT=true
+
+# Future services (coming soon)
+ENABLE_FASTAPI=false     # FastAPI development server
+ENABLE_MCP=false         # MCP protocol server
+```
+
+**2. Rebuild Container:**
+
+- In VS Code: `Cmd+Shift+P` → "Dev Containers: Rebuild Container"
+- Or manually: `docker-compose down && docker-compose up -d`
+
+**3. That's it!** Enabled services start automatically.
+
+### Available Services
+
+| Service | Status | Enable | Purpose |
+|---------|--------|--------|---------|
+| **Workspace** | Always On | - | Core development (Python, Jupyter, Docker CLI) |
+| **Playwright** | Optional | `ENABLE_PLAYWRIGHT=true` | Browser automation (Chromium + HTTP API) |
+| **FastAPI** | Coming Soon | `ENABLE_FASTAPI=true` | FastAPI development server |
+| **MCP** | Coming Soon | `ENABLE_MCP=true` | Model Context Protocol server |
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ Config-Driven Multi-Container Stack                     │
+│                                                          │
+│  ┌────────────────────────────────────────────────┐    │
+│  │ workspace (ALWAYS)                             │    │
+│  │ Core: Python, Jupyter, Docker CLI              │    │
+│  └────────────────────────────────────────────────┘    │
+│                         ↕                               │
+│  ┌────────────────────────────────────────────────┐    │
+│  │ playwright (if ENABLE_PLAYWRIGHT=true)         │    │
+│  │ Browser automation service                     │    │
+│  └────────────────────────────────────────────────┘    │
+│                         ↕                               │
+│  ┌────────────────────────────────────────────────┐    │
+│  │ fastapi (if ENABLE_FASTAPI=true) - Future     │    │
+│  │ FastAPI development server                     │    │
+│  └────────────────────────────────────────────────┘    │
+│                                                          │
+│  Configuration: .devcontainer/.env                      │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Benefits
+
+✅ **Simple** - One config file, rebuild container, done
+✅ **Fast** - Only run services you need
+✅ **Clean** - Core workspace stays minimal
+✅ **Extensible** - Easy to add new services (see `.devcontainer/services/README.md`)
+✅ **No Breaking Changes** - Existing Playwright setup still works
+
+### Adding New Services
+
+See `.devcontainer/services/README.md` for detailed instructions. Quick summary:
+
+1. Add `ENABLE_MYSERVICE=false` to `.env`
+2. Update `init-profiles.sh` to handle the new flag
+3. Add service definition to `docker-compose.yml` with profiles
+4. Create service directory under `.devcontainer/services/myservice/`
 
 ---
 
@@ -937,16 +1015,21 @@ gh repo clone username/repo
 ```
 .
 ├── .devcontainer/
-│   ├── docker-compose.yml              # Multi-container orchestration
+│   ├── docker-compose.yml              # Multi-container orchestration with profiles ⭐
 │   ├── devcontainer.json               # VS Code DevContainer config
+│   ├── .env                            # Service configuration (enable/disable) ⭐ NEW
+│   ├── .env.example                    # Configuration template ⭐ NEW
+│   ├── init-profiles.sh                # Profile initialization script ⭐ NEW
 │   ├── workspace/                      # Workspace service
 │   │   ├── Dockerfile                  # Clean dev environment (no browsers)
 │   │   └── post-create.sh              # Setup script (no browser downloads)
-│   └── playwright/                     # Playwright service
-│       ├── Dockerfile                  # Browser automation container
-│       ├── playwright-server.js        # HTTP API server (Express.js)
-│       ├── start-xvfb.sh               # Startup script (Xvfb + server)
-│       └── healthcheck.sh              # Health check script
+│   └── services/                       # Optional services directory ⭐ MOVED
+│       ├── README.md                   # Service templates and guide ⭐ NEW
+│       └── playwright/                 # Playwright service (optional) ⭐
+│           ├── Dockerfile              # Browser automation container
+│           ├── playwright-server.js    # HTTP API server (Express.js)
+│           ├── start-xvfb.sh           # Startup script (Xvfb + server)
+│           └── healthcheck.sh          # Health check script
 ├── web-ui-optimizer/
 │   ├── __init__.py                     # Package exports
 │   ├── remote_playwright.py            # HTTP client library (414 lines)
@@ -963,8 +1046,11 @@ gh repo clone username/repo
 ├── uv.lock                             # Locked dependencies
 ├── test.ipynb                          # Example Jupyter notebook
 ├── CLAUDE.md                           # Architecture guide for Claude Code
+├── REFACTORING_PLAN.md                 # Implementation plan ⭐ NEW
 └── README.md                           # This file
 ```
+
+**⭐ = New or significantly changed in v4.0 (Config-Driven Services)**
 
 ---
 
@@ -1384,7 +1470,49 @@ Found a bug? Have a suggestion?
 
 ## 📝 Changelog
 
-### Version 3.0 (Current) - Multi-Container Architecture
+### Version 4.0 (Current) - Config-Driven Optional Services ⭐ **NEW**
+
+**Major Improvement: Configuration-Based Service Management**
+
+- ⚙️ **Config-Driven Services** - Enable/disable services via `.env` file
+- 🔌 **Docker Compose Profiles** - Native profile system for service activation
+- 📝 **Simple Configuration** - Change `ENABLE_PLAYWRIGHT=true/false`, rebuild
+- 🚀 **Init Script** - Automatic profile generation from configuration
+- 📚 **Service Templates** - Documentation and templates for adding new services
+- 🗂️ **Restructured Layout** - `playwright/` → `services/playwright/` for modularity
+- 🛠️ **No Breaking Changes** - Existing setups continue to work
+
+**Benefits:**
+
+- ✅ **Simpler** - One config file controls all services
+- ✅ **Faster** - Only run services you need
+- ✅ **Cleaner** - Core workspace stays minimal
+- ✅ **Extensible** - Easy to add new services (FastAPI, MCP, databases, etc.)
+- ✅ **Documented** - Comprehensive guide for service addition
+
+**Files Added:**
+
+- New: `.devcontainer/.env` (service configuration)
+- New: `.devcontainer/.env.example` (configuration template)
+- New: `.devcontainer/init-profiles.sh` (profile initialization, 188 lines)
+- New: `.devcontainer/services/README.md` (service guide, 520 lines)
+- New: `REFACTORING_PLAN.md` (implementation documentation)
+
+**Files Modified:**
+
+- Updated: `.devcontainer/docker-compose.yml` (added Docker Compose profiles)
+- Updated: `.devcontainer/devcontainer.json` (added initializeCommand)
+- Updated: `.gitignore` (ignore generated .env.profiles)
+
+**Files Moved:**
+
+- Moved: `.devcontainer/playwright/` → `.devcontainer/services/playwright/`
+
+**See Also:** `REFACTORING_PLAN.md` for complete implementation details
+
+---
+
+### Version 3.0 - Multi-Container Architecture
 
 **Major Architecture Change:**
 

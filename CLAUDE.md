@@ -4,38 +4,90 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **multi-container DevContainer environment** specifically designed for Claude Code integration with full Python, Jupyter, Docker, and Playwright support. The repository provides a production-ready, security-hardened development environment using Docker Compose to orchestrate separate services for development and browser automation.
+This is a **config-driven multi-container DevContainer environment** specifically designed for Claude Code integration with full Python, Jupyter, Docker, and optional Playwright support. The repository provides a production-ready, security-hardened development environment using Docker Compose to orchestrate a core workspace plus optional services that can be easily enabled/disabled via configuration.
 
-**Key Architecture Decision**: This project uses a **modular multi-container architecture** with:
-- **Workspace service**: Python development environment (no browsers)
-- **Playwright service**: Dedicated browser automation service (Chromium + HTTP API)
-- **Docker Compose**: Orchestrates both services
+**Key Architecture Decision**: This project uses a **config-driven modular multi-container architecture** with:
+- **Workspace service**: Python development environment (always enabled, no browsers)
+- **Optional services**: Enable/disable via `.devcontainer/.env` configuration file
+  - **Playwright service**: Dedicated browser automation service (Chromium + HTTP API)
+  - **FastAPI service** (future): FastAPI development server
+  - **MCP service** (future): Model Context Protocol server
+- **Docker Compose Profiles**: Native Docker Compose feature for conditional service startup
+- **Init script**: Automatically generates profiles from `.env` configuration
 - **Docker-outside-of-Docker (DooD)**: Access to host Docker without privileged mode
+
+## Service Configuration (NEW in v4.0)
+
+### Quick Reference: Enable/Disable Services
+
+**1. Edit `.devcontainer/.env`:**
+
+```bash
+# Optional Services
+ENABLE_PLAYWRIGHT=true   # Browser automation
+ENABLE_FASTAPI=false     # FastAPI server (future)
+ENABLE_MCP=false         # MCP server (future)
+```
+
+**2. Rebuild container** (services activate automatically)
+
+### How It Works
+
+1. **Configuration** → User edits `.devcontainer/.env`
+2. **Initialization** → `init-profiles.sh` runs before docker-compose, generates `.env.profiles`
+3. **Profile Activation** → Docker Compose reads profiles and starts enabled services
+4. **Service Startup** → Only enabled services consume resources
+
+### Adding New Services
+
+See `.devcontainer/services/README.md` for comprehensive guide. Quick steps:
+
+1. Add `ENABLE_NEWSERVICE=false` to `.env`
+2. Update `init-profiles.sh` to convert flag to profile
+3. Add service to `docker-compose.yml` with `profiles: ["${NEWSERVICE_PROFILE:-disabled}"]`
+4. Create service directory under `.devcontainer/services/newservice/`
 
 ## Essential Commands
 
 ### Multi-Container Management
 
 ```bash
-# View all services status
+# View all services status (shows only enabled services)
 docker-compose ps
 
 # View service logs
 docker-compose logs -f workspace
-docker-compose logs -f playwright
+docker-compose logs -f playwright  # Only if ENABLE_PLAYWRIGHT=true
 
 # Restart a service
 docker-compose restart playwright
 
 # Rebuild a service
 docker-compose build workspace
-docker-compose build playwright
+docker-compose build playwright  # Only rebuilds if service is enabled
 
 # Stop all services
 docker-compose down
 
 # Stop and remove volumes
 docker-compose down -v
+```
+
+### Service Configuration Commands
+
+```bash
+# View current service configuration
+cat .devcontainer/.env
+
+# Check which services are enabled
+cat .devcontainer/.env.profiles  # Auto-generated, shows active profiles
+
+# Regenerate profiles (if you manually edited .env)
+bash .devcontainer/init-profiles.sh
+
+# Enable Playwright service
+# 1. Edit .env: ENABLE_PLAYWRIGHT=true
+# 2. Rebuild: Cmd+Shift+P → "Dev Containers: Rebuild Container"
 ```
 
 ### Python Development
@@ -120,9 +172,14 @@ claude review
 
 **Note**: The Claude Code CLI is installed globally via npm during the post-create script and is available immediately in the workspace container.
 
-### Playwright Browser Automation (Remote Service)
+### Playwright Browser Automation (Optional Remote Service)
+
+**Note**: Playwright service is OPTIONAL. Enable with `ENABLE_PLAYWRIGHT=true` in `.devcontainer/.env`
 
 ```bash
+# First, verify Playwright is enabled
+docker-compose ps playwright  # Should show service running
+
 # Check Playwright service status
 docker-compose ps playwright
 docker exec claude-playwright curl http://localhost:3000/health
@@ -143,6 +200,11 @@ python examples/03_ui_optimizer_full.py https://example.com
 # Test connection
 python web-ui-optimizer/connection.py
 ```
+
+**If Playwright service is not running:**
+1. Check `.devcontainer/.env` - ensure `ENABLE_PLAYWRIGHT=true`
+2. Rebuild container: Cmd+Shift+P → "Dev Containers: Rebuild Container"
+3. Or manually: `bash .devcontainer/init-profiles.sh && docker-compose up -d`
 
 **Environment Variables**:
 - `PLAYWRIGHT_SERVICE_URL=http://playwright:3000` - Playwright service endpoint
