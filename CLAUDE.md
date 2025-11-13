@@ -16,36 +16,53 @@ This is a **config-driven multi-container DevContainer environment** specificall
 - **Init script**: Automatically generates profiles from `.env` configuration
 - **Docker-outside-of-Docker (DooD)**: Access to host Docker without privileged mode
 
-## Service Configuration (NEW in v4.0)
+## Service Configuration (v4.0 - Config-Driven Services)
 
 ### Quick Reference: Enable/Disable Services
 
-**1. Edit `.devcontainer/.env`:**
+**1. Edit `.devcontainer/devcontainer.json`:**
 
-```bash
-# Optional Services
-ENABLE_PLAYWRIGHT=true   # Browser automation
-ENABLE_FASTAPI=false     # FastAPI server (future)
-ENABLE_MCP=false         # MCP server (future)
+```json
+// Find the runServices property and add/remove services
+"runServices": ["workspace", "playwright"],
 ```
 
-**2. Rebuild container** (services activate automatically)
+**2. Rebuild container** (Cmd+Shift+P → "Dev Containers: Rebuild Container")
+
+That's it! Only the services listed in `runServices` will start and consume resources.
 
 ### How It Works
 
-1. **Configuration** → User edits `.devcontainer/.env`
-2. **Initialization** → `init-profiles.sh` runs before docker-compose, generates `.env.profiles`
-3. **Profile Activation** → Docker Compose reads profiles and starts enabled services
-4. **Service Startup** → Only enabled services consume resources
+The config-driven architecture uses VS Code's native `runServices` feature combined with Docker Compose profiles:
+
+1. **Configuration** → Edit `runServices` array in `.devcontainer/devcontainer.json`
+2. **Service Startup** → VS Code starts only services listed in `runServices`
+3. **Resource Usage** → Unlisted services don't start, don't consume resources
+4. **Profiles** → Docker Compose profiles ensure dependencies are handled correctly
+
+**Available Services:**
+- `workspace` (always included, core development environment)
+- `playwright` (optional, browser automation service)
+- Future: `fastapi`, `mcp`, etc.
+
+**Example Configurations:**
+
+```json
+// Minimal setup (no browser automation)
+"runServices": ["workspace"]
+
+// Full setup (all services)
+"runServices": ["workspace", "playwright"]
+```
 
 ### Adding New Services
 
 See `.devcontainer/services/README.md` for comprehensive guide. Quick steps:
 
-1. Add `ENABLE_NEWSERVICE=false` to `.env`
-2. Update `init-profiles.sh` to convert flag to profile
-3. Add service to `docker-compose.yml` with `profiles: ["${NEWSERVICE_PROFILE:-disabled}"]`
-4. Create service directory under `.devcontainer/services/newservice/`
+1. Add service to `docker-compose.yml` (with appropriate profile if needed)
+2. Add service name to `runServices` array in `devcontainer.json`
+3. Create service directory under `.devcontainer/services/newservice/`
+4. Optionally add `ENABLE_NEWSERVICE=false` to `.env` for environment variable control
 
 ## Essential Commands
 
@@ -76,18 +93,19 @@ docker-compose down -v
 ### Service Configuration Commands
 
 ```bash
-# View current service configuration
-cat .devcontainer/.env
+# Check which services are currently running
+docker-compose ps
 
-# Check which services are enabled
-cat .devcontainer/.env.profiles  # Auto-generated, shows active profiles
+# View configuration
+cat .devcontainer/devcontainer.json | grep -A 5 runServices
 
-# Regenerate profiles (if you manually edited .env)
-bash .devcontainer/init-profiles.sh
-
-# Enable Playwright service
-# 1. Edit .env: ENABLE_PLAYWRIGHT=true
+# Enable/disable Playwright service
+# 1. Edit devcontainer.json: "runServices": ["workspace", "playwright"]
 # 2. Rebuild: Cmd+Shift+P → "Dev Containers: Rebuild Container"
+
+# Check service logs
+docker-compose logs workspace
+docker-compose logs playwright  # Only if service is running
 ```
 
 ### Python Development
@@ -174,7 +192,7 @@ claude review
 
 ### Playwright Browser Automation (Optional Remote Service)
 
-**Note**: Playwright service is OPTIONAL. Enable with `ENABLE_PLAYWRIGHT=true` in `.devcontainer/.env`
+**Note**: Playwright service is OPTIONAL. Enable by adding `"playwright"` to the `runServices` array in `.devcontainer/devcontainer.json`
 
 ```bash
 # First, verify Playwright is enabled
@@ -202,9 +220,10 @@ python web-ui-optimizer/connection.py
 ```
 
 **If Playwright service is not running:**
-1. Check `.devcontainer/.env` - ensure `ENABLE_PLAYWRIGHT=true`
+
+1. Check `.devcontainer/devcontainer.json` - ensure `"playwright"` is in the `runServices` array
 2. Rebuild container: Cmd+Shift+P → "Dev Containers: Rebuild Container"
-3. Or manually: `bash .devcontainer/init-profiles.sh && docker-compose up -d`
+3. Or manually: `docker-compose up -d playwright`
 
 **Environment Variables**:
 - `PLAYWRIGHT_SERVICE_URL=http://playwright:3000` - Playwright service endpoint

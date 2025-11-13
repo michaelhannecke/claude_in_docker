@@ -39,6 +39,11 @@
   // Which service to connect to (VS Code will attach to this container)
   "service": "workspace",
 
+  // Which services to start (VS Code will run docker-compose with these services)
+  // Note: This explicitly starts services with the "playwright" profile
+  // Services not listed here will only start if they have no profile requirement
+  "runServices": ["workspace", "playwright"],
+
   // Workspace folder inside the container
   // This should match the volume mount in docker-compose.yml
   "workspaceFolder": "/workspaces/claude_in_devcontainer",
@@ -234,6 +239,8 @@
   // 1. Service Configuration:
   //    - Edit .devcontainer/.env to enable/disable services
   //    - Set ENABLE_PLAYWRIGHT=true to activate browser automation
+  //    - IMPORTANT: Currently, Playwright service is in runServices above
+  //    - To disable Playwright: Remove "playwright" from runServices array
   //    - Changes require container rebuild
   //    - Core workspace always runs regardless of optional services
   //

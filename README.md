@@ -62,38 +62,33 @@ This repository demonstrates **how to run Claude Code in a multi-container Docke
 
 ---
 
-## ⚙️ Service Configuration **NEW**
+## ⚙️ Service Configuration **NEW in v4.0**
 
 ### Quick Start: Enable/Disable Services
 
-This DevContainer uses a **config-driven architecture** where optional services can be easily enabled or disabled:
+This DevContainer uses a **config-driven architecture** where optional services can be easily enabled or disabled using VS Code's native `runServices` feature:
 
-**1. Edit `.devcontainer/.env`:**
+**1. Edit `.devcontainer/devcontainer.json`:**
 
-```bash
-# Enable browser automation
-ENABLE_PLAYWRIGHT=true
-
-# Future services (coming soon)
-ENABLE_FASTAPI=false     # FastAPI development server
-ENABLE_MCP=false         # MCP protocol server
+```json
+// Find the runServices property and modify the array
+"runServices": ["workspace", "playwright"]
 ```
 
 **2. Rebuild Container:**
 
 - In VS Code: `Cmd+Shift+P` → "Dev Containers: Rebuild Container"
-- Or manually: `docker-compose down && docker-compose up -d`
 
-**3. That's it!** Enabled services start automatically.
+**3. That's it!** Only services in the array will start and consume resources.
 
 ### Available Services
 
-| Service | Status | Enable | Purpose |
-|---------|--------|--------|---------|
-| **Workspace** | Always On | - | Core development (Python, Jupyter, Docker CLI) |
-| **Playwright** | Optional | `ENABLE_PLAYWRIGHT=true` | Browser automation (Chromium + HTTP API) |
-| **FastAPI** | Coming Soon | `ENABLE_FASTAPI=true` | FastAPI development server |
-| **MCP** | Coming Soon | `ENABLE_MCP=true` | Model Context Protocol server |
+| Service | Status | How to Enable | Purpose |
+|---------|--------|---------------|---------|
+| **Workspace** | Always On | Always included | Core development (Python, Jupyter, Docker CLI) |
+| **Playwright** | Optional | Add `"playwright"` to `runServices` | Browser automation (Chromium + HTTP API) |
+| **FastAPI** | Coming Soon | Add `"fastapi"` to `runServices` | FastAPI development server |
+| **MCP** | Coming Soon | Add `"mcp"` to `runServices` | Model Context Protocol server |
 
 ### Architecture
 
@@ -107,35 +102,37 @@ ENABLE_MCP=false         # MCP protocol server
 │  └────────────────────────────────────────────────┘    │
 │                         ↕                               │
 │  ┌────────────────────────────────────────────────┐    │
-│  │ playwright (if ENABLE_PLAYWRIGHT=true)         │    │
+│  │ playwright (optional)                          │    │
 │  │ Browser automation service                     │    │
+│  │ Enabled via runServices array                  │    │
 │  └────────────────────────────────────────────────┘    │
 │                         ↕                               │
 │  ┌────────────────────────────────────────────────┐    │
-│  │ fastapi (if ENABLE_FASTAPI=true) - Future     │    │
+│  │ fastapi (future)                               │    │
 │  │ FastAPI development server                     │    │
+│  │ Enabled via runServices array                  │    │
 │  └────────────────────────────────────────────────┘    │
 │                                                          │
-│  Configuration: .devcontainer/.env                      │
+│  Configuration: devcontainer.json → runServices         │
 └─────────────────────────────────────────────────────────┘
 ```
 
 ### Benefits
 
-✅ **Simple** - One config file, rebuild container, done
-✅ **Fast** - Only run services you need
+✅ **Simple** - Edit one array, rebuild container, done
+✅ **Fast** - Only run services you need (no resource waste)
 ✅ **Clean** - Core workspace stays minimal
+✅ **Native** - Uses VS Code's built-in `runServices` feature
 ✅ **Extensible** - Easy to add new services (see `.devcontainer/services/README.md`)
-✅ **No Breaking Changes** - Existing Playwright setup still works
 
 ### Adding New Services
 
 See `.devcontainer/services/README.md` for detailed instructions. Quick summary:
 
-1. Add `ENABLE_MYSERVICE=false` to `.env`
-2. Update `init-profiles.sh` to handle the new flag
-3. Add service definition to `docker-compose.yml` with profiles
-4. Create service directory under `.devcontainer/services/myservice/`
+1. Add service definition to `docker-compose.yml` (with appropriate profile)
+2. Create service directory under `.devcontainer/services/myservice/`
+3. Add service name to `runServices` array in `devcontainer.json`
+4. Rebuild container to start the new service
 
 ---
 
@@ -1016,14 +1013,11 @@ gh repo clone username/repo
 .
 ├── .devcontainer/
 │   ├── docker-compose.yml              # Multi-container orchestration with profiles ⭐
-│   ├── devcontainer.json               # VS Code DevContainer config
-│   ├── .env                            # Service configuration (enable/disable) ⭐ NEW
-│   ├── .env.example                    # Configuration template ⭐ NEW
-│   ├── init-profiles.sh                # Profile initialization script ⭐ NEW
+│   ├── devcontainer.json               # VS Code DevContainer config (runServices) ⭐ UPDATED
 │   ├── workspace/                      # Workspace service
 │   │   ├── Dockerfile                  # Clean dev environment (no browsers)
 │   │   └── post-create.sh              # Setup script (no browser downloads)
-│   └── services/                       # Optional services directory ⭐ MOVED
+│   └── services/                       # Optional services directory ⭐ NEW
 │       ├── README.md                   # Service templates and guide ⭐ NEW
 │       └── playwright/                 # Playwright service (optional) ⭐
 │           ├── Dockerfile              # Browser automation container
@@ -1474,41 +1468,39 @@ Found a bug? Have a suggestion?
 
 **Major Improvement: Configuration-Based Service Management**
 
-- ⚙️ **Config-Driven Services** - Enable/disable services via `.env` file
-- 🔌 **Docker Compose Profiles** - Native profile system for service activation
-- 📝 **Simple Configuration** - Change `ENABLE_PLAYWRIGHT=true/false`, rebuild
-- 🚀 **Init Script** - Automatic profile generation from configuration
+- ⚙️ **Config-Driven Services** - Enable/disable services via `runServices` array
+- 🔌 **Native VS Code Feature** - Uses DevContainer's built-in `runServices` support
+- 📝 **Simple Configuration** - Edit array in `devcontainer.json`, rebuild
+- 🚀 **Docker Compose Profiles** - Services automatically start based on configuration
 - 📚 **Service Templates** - Documentation and templates for adding new services
 - 🗂️ **Restructured Layout** - `playwright/` → `services/playwright/` for modularity
-- 🛠️ **No Breaking Changes** - Existing setups continue to work
+- 🛠️ **Clean Implementation** - No complex init scripts needed
 
 **Benefits:**
 
-- ✅ **Simpler** - One config file controls all services
-- ✅ **Faster** - Only run services you need
+- ✅ **Simpler** - One array controls all services
+- ✅ **Faster** - Only run services you need (no resource waste)
 - ✅ **Cleaner** - Core workspace stays minimal
+- ✅ **Native** - Uses VS Code's standard feature (no hacks)
 - ✅ **Extensible** - Easy to add new services (FastAPI, MCP, databases, etc.)
 - ✅ **Documented** - Comprehensive guide for service addition
 
-**Files Added:**
+**Key Changes:**
 
-- New: `.devcontainer/.env` (service configuration)
-- New: `.devcontainer/.env.example` (configuration template)
-- New: `.devcontainer/init-profiles.sh` (profile initialization, 188 lines)
-- New: `.devcontainer/services/README.md` (service guide, 520 lines)
-- New: `REFACTORING_PLAN.md` (implementation documentation)
-
-**Files Modified:**
-
-- Updated: `.devcontainer/docker-compose.yml` (added Docker Compose profiles)
-- Updated: `.devcontainer/devcontainer.json` (added initializeCommand)
-- Updated: `.gitignore` (ignore generated .env.profiles)
-
-**Files Moved:**
-
+- Updated: `.devcontainer/devcontainer.json` (added `runServices` property)
+- New: `.devcontainer/services/` (organized services directory)
+- New: `.devcontainer/services/README.md` (service guide, 520+ lines)
 - Moved: `.devcontainer/playwright/` → `.devcontainer/services/playwright/`
+- Updated: `docker-compose.yml` (added profiles for optional services)
 
-**See Also:** `REFACTORING_PLAN.md` for complete implementation details
+**Configuration Method:**
+
+```json
+// Edit this array in devcontainer.json
+"runServices": ["workspace", "playwright"]
+```
+
+**See Also:** `.devcontainer/services/README.md` for adding new services
 
 ---
 
