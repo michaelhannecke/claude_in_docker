@@ -14,3 +14,7 @@ wheels/
 
 # UV locks
 *.lock
+
+# DevContainer generated files
+.devcontainer/.env.profiles
+.devcontainer/state-*.txt

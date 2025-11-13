@@ -23,16 +23,26 @@
   // ============================================================================
   // Instead of using "image", we use Docker Compose to manage multiple services
   // VS Code will:
-  // 1. Run docker-compose up with this file
-  // 2. Connect to the specified service (workspace)
-  // 3. All containers defined in compose file will start
+  // 1. Run initializeCommand (init-profiles.sh) to configure services
+  // 2. Run docker-compose up with configured profiles
+  // 3. Connect to the workspace service
+  // 4. Optional services start based on .env configuration
   // ============================================================================
+
+  // Initialize command runs BEFORE docker-compose
+  // Generates .env.profiles from .env to configure which services to start
+  "initializeCommand": "bash .devcontainer/init-profiles.sh",
 
   // Path to docker-compose.yml (relative to this file)
   "dockerComposeFile": "docker-compose.yml",
 
   // Which service to connect to (VS Code will attach to this container)
   "service": "workspace",
+
+  // Which services to start (VS Code will run docker-compose with these services)
+  // Note: This explicitly starts services with the "playwright" profile
+  // Services not listed here will only start if they have no profile requirement
+  "runServices": ["workspace", "playwright"],
 
   // Workspace folder inside the container
   // This should match the volume mount in docker-compose.yml
@@ -222,36 +232,50 @@
   // ============================================================================
 
   // ============================================================================
-  // NOTES FOR MULTI-CONTAINER SETUP
+  // NOTES FOR MODULAR MULTI-CONTAINER SETUP
   // ============================================================================
-  // Important differences from single-container:
+  // Important features of this config-driven setup:
   //
-  // 1. Container Communication:
-  //    - Workspace can reach playwright via: http://playwright:3000
-  //    - Docker Compose provides internal DNS
-  //    - No need for host networking
+  // 1. Service Configuration:
+  //    - Edit .devcontainer/.env to enable/disable services
+  //    - Set ENABLE_PLAYWRIGHT=true to activate browser automation
+  //    - IMPORTANT: Currently, Playwright service is in runServices above
+  //    - To disable Playwright: Remove "playwright" from runServices array
+  //    - Changes require container rebuild
+  //    - Core workspace always runs regardless of optional services
   //
-  // 2. Startup Order:
-  //    - Playwright service starts first
-  //    - Health check must pass
-  //    - Then workspace service starts
+  // 2. Container Communication:
+  //    - Workspace can reach enabled services via Docker DNS
+  //    - Example: http://playwright:3000 (if enabled)
+  //    - Services are isolated in separate containers
+  //
+  // 3. Startup Order:
+  //    - init-profiles.sh runs first (generates .env.profiles)
+  //    - Docker Compose starts enabled services
   //    - VS Code connects to workspace
+  //    - Optional services start in background
   //
-  // 3. Volume Management:
+  // 4. Volume Management:
   //    - Named volumes for persistence
-  //    - Shared volumes for artifacts
+  //    - Shared volumes for artifacts (if services need them)
   //    - Bind mount for source code
   //
-  // 4. Rebuilding:
-  //    - docker-compose build              (rebuild all)
+  // 5. Rebuilding:
+  //    - docker-compose build              (rebuild all enabled services)
   //    - docker-compose build workspace    (rebuild workspace only)
-  //    - docker-compose build playwright   (rebuild playwright only)
+  //    - docker-compose build playwright   (rebuild playwright only, if enabled)
   //
-  // 5. Debugging:
-  //    - docker-compose ps                 (check status)
+  // 6. Debugging:
+  //    - docker-compose ps                 (check status of enabled services)
   //    - docker-compose logs -f            (follow logs)
-  //    - docker-compose logs playwright    (playwright logs)
+  //    - docker-compose logs playwright    (playwright logs, if enabled)
   //    - docker exec claude-workspace bash (shell in workspace)
+  //
+  // 7. Adding New Services:
+  //    - Add ENABLE_SERVICENAME=false to .env
+  //    - Add profile conversion to init-profiles.sh
+  //    - Add service definition with profiles: ["${SERVICENAME_PROFILE:-disabled}"]
+  //    - See services/README.md for templates
   //
   // ============================================================================
 }

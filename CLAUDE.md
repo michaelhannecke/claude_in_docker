@@ -4,38 +4,108 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **multi-container DevContainer environment** specifically designed for Claude Code integration with full Python, Jupyter, Docker, and Playwright support. The repository provides a production-ready, security-hardened development environment using Docker Compose to orchestrate separate services for development and browser automation.
+This is a **config-driven multi-container DevContainer environment** specifically designed for Claude Code integration with full Python, Jupyter, Docker, and optional Playwright support. The repository provides a production-ready, security-hardened development environment using Docker Compose to orchestrate a core workspace plus optional services that can be easily enabled/disabled via configuration.
 
-**Key Architecture Decision**: This project uses a **modular multi-container architecture** with:
-- **Workspace service**: Python development environment (no browsers)
-- **Playwright service**: Dedicated browser automation service (Chromium + HTTP API)
-- **Docker Compose**: Orchestrates both services
+**Key Architecture Decision**: This project uses a **config-driven modular multi-container architecture** with:
+- **Workspace service**: Python development environment (always enabled, no browsers)
+- **Optional services**: Enable/disable via `.devcontainer/.env` configuration file
+  - **Playwright service**: Dedicated browser automation service (Chromium + HTTP API)
+  - **FastAPI service** (future): FastAPI development server
+  - **MCP service** (future): Model Context Protocol server
+- **Docker Compose Profiles**: Native Docker Compose feature for conditional service startup
+- **Init script**: Automatically generates profiles from `.env` configuration
 - **Docker-outside-of-Docker (DooD)**: Access to host Docker without privileged mode
+
+## Service Configuration (v4.0 - Config-Driven Services)
+
+### Quick Reference: Enable/Disable Services
+
+**1. Edit `.devcontainer/devcontainer.json`:**
+
+```json
+// Find the runServices property and add/remove services
+"runServices": ["workspace", "playwright"],
+```
+
+**2. Rebuild container** (Cmd+Shift+P → "Dev Containers: Rebuild Container")
+
+That's it! Only the services listed in `runServices` will start and consume resources.
+
+### How It Works
+
+The config-driven architecture uses VS Code's native `runServices` feature combined with Docker Compose profiles:
+
+1. **Configuration** → Edit `runServices` array in `.devcontainer/devcontainer.json`
+2. **Service Startup** → VS Code starts only services listed in `runServices`
+3. **Resource Usage** → Unlisted services don't start, don't consume resources
+4. **Profiles** → Docker Compose profiles ensure dependencies are handled correctly
+
+**Available Services:**
+- `workspace` (always included, core development environment)
+- `playwright` (optional, browser automation service)
+- Future: `fastapi`, `mcp`, etc.
+
+**Example Configurations:**
+
+```json
+// Minimal setup (no browser automation)
+"runServices": ["workspace"]
+
+// Full setup (all services)
+"runServices": ["workspace", "playwright"]
+```
+
+### Adding New Services
+
+See `.devcontainer/services/README.md` for comprehensive guide. Quick steps:
+
+1. Add service to `docker-compose.yml` (with appropriate profile if needed)
+2. Add service name to `runServices` array in `devcontainer.json`
+3. Create service directory under `.devcontainer/services/newservice/`
+4. Optionally add `ENABLE_NEWSERVICE=false` to `.env` for environment variable control
 
 ## Essential Commands
 
 ### Multi-Container Management
 
 ```bash
-# View all services status
+# View all services status (shows only enabled services)
 docker-compose ps
 
 # View service logs
 docker-compose logs -f workspace
-docker-compose logs -f playwright
+docker-compose logs -f playwright  # Only if ENABLE_PLAYWRIGHT=true
 
 # Restart a service
 docker-compose restart playwright
 
 # Rebuild a service
 docker-compose build workspace
-docker-compose build playwright
+docker-compose build playwright  # Only rebuilds if service is enabled
 
 # Stop all services
 docker-compose down
 
 # Stop and remove volumes
 docker-compose down -v
+```
+
+### Service Configuration Commands
+
+```bash
+# Check which services are currently running
+docker-compose ps
+
+# View configuration
+cat .devcontainer/devcontainer.json | grep -A 5 runServices
+
+# Enable/disable Playwright service
+# 1. Edit devcontainer.json: "runServices": ["workspace", "playwright"]
+# 2. Rebuild: Cmd+Shift+P → "Dev Containers: Rebuild Container"
+
+# Check service logs
+docker-compose logs workspace
+docker-compose logs playwright  # Only if service is running
 ```
 
 ### Python Development
@@ -120,9 +190,14 @@ claude review
 
 **Note**: The Claude Code CLI is installed globally via npm during the post-create script and is available immediately in the workspace container.
 
-### Playwright Browser Automation (Remote Service)
+### Playwright Browser Automation (Optional Remote Service)
+
+**Note**: Playwright service is OPTIONAL. Enable by adding `"playwright"` to the `runServices` array in `.devcontainer/devcontainer.json`
 
 ```bash
+# First, verify Playwright is enabled
+docker-compose ps playwright  # Should show service running
+
 # Check Playwright service status
 docker-compose ps playwright
 docker exec claude-playwright curl http://localhost:3000/health
@@ -143,6 +218,12 @@ python examples/03_ui_optimizer_full.py https://example.com
 # Test connection
 python web-ui-optimizer/connection.py
 ```
+
+**If Playwright service is not running:**
+
+1. Check `.devcontainer/devcontainer.json` - ensure `"playwright"` is in the `runServices` array
+2. Rebuild container: Cmd+Shift+P → "Dev Containers: Rebuild Container"
+3. Or manually: `docker-compose up -d playwright`
 
 **Environment Variables**:
 - `PLAYWRIGHT_SERVICE_URL=http://playwright:3000` - Playwright service endpoint
