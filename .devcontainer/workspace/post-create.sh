@@ -216,12 +216,30 @@ else
     else
         # Install Claude Code globally via npm
         print_status "Installing @anthropic-ai/claude-code via npm..."
-        sudo npm install -g @anthropic-ai/claude-code
 
-        if command -v claude &> /dev/null; then
-            print_success "Claude Code installed: $(claude --version)"
+        # Use sudo and specify verbose output for debugging
+        # Note: Using sudo installs to /usr/bin instead of npm global path
+        if sudo npm install -g @anthropic-ai/claude-code --loglevel=info; then
+            print_success "npm install completed"
+
+            # Wait a moment for symlinks to be created
+            sleep 2
+
+            # Verify installation
+            if command -v claude &> /dev/null; then
+                CLAUDE_VERSION=$(claude --version 2>/dev/null || echo "unknown")
+                print_success "Claude Code installed: $CLAUDE_VERSION"
+            else
+                print_error "Claude Code installation failed - 'claude' command not found"
+                print_warning "Debugging info:"
+                print_warning "  PATH: $PATH"
+                print_warning "  which claude: $(which claude 2>&1 || echo 'not found')"
+                print_warning "  npm global packages: $(npm list -g --depth=0 2>&1)"
+            fi
         else
-            print_warning "Claude Code installation completed but 'claude' command not found"
+            print_error "npm install failed with exit code $?"
+            print_warning "You can install manually after container starts with:"
+            print_warning "  sudo npm install -g @anthropic-ai/claude-code"
         fi
     fi
 fi
@@ -541,7 +559,15 @@ print_status "Environment:"
 echo "  • Python: $(python --version)"
 echo "  • Node.js: $(node --version 2>/dev/null || echo 'not found')"
 echo "  • npm: $(npm --version 2>/dev/null || echo 'not found')"
-echo "  • Claude Code: $(claude --version 2>/dev/null || echo 'not installed')"
+
+# Check Claude Code installation with detailed status
+if command -v claude &> /dev/null; then
+    CLAUDE_VERSION=$(claude --version 2>/dev/null || echo 'unknown')
+    echo "  • Claude Code: $CLAUDE_VERSION"
+else
+    echo "  • Claude Code: not installed (run: sudo npm install -g @anthropic-ai/claude-code)"
+fi
+
 echo "  • Virtual env: $VENV_PATH"
 echo "  • Playwright service: \$PLAYWRIGHT_SERVICE_URL"
 echo ""
