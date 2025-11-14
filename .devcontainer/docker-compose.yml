@@ -28,7 +28,8 @@
 # - docker-compose down            # Stop all services
 # ============================================================================
 
-version: '3.8'
+# Note: The "version" field is no longer required in modern Docker Compose
+# Docker Compose automatically uses the latest format based on the features used
 
 # ============================================================================
 # SERVICES
