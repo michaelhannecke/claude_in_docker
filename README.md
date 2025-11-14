@@ -9,10 +9,13 @@
 A production-ready VS Code DevContainer specifically designed for **Claude Code integration**, using a **config-driven modular multi-container architecture** with Docker Compose. Provides a fully-configured development environment with Python, Jupyter, Docker support, and **optional services** that can be easily enabled/disabled via configuration file.
 
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Integrated-blueviolet?logo=anthropic)](https://claude.com/claude-code)
+[![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-blueviolet?logo=anthropic)](https://claude.com/claude-code)
 [![DevContainer](https://img.shields.io/badge/Dev%20Container-Ready-blue?logo=docker)](https://containers.dev/)
 [![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)](https://www.python.org/)
 [![Jupyter](https://img.shields.io/badge/Jupyter-Enabled-orange?logo=jupyter)](https://jupyter.org/)
 [![Security](https://img.shields.io/badge/Security-Hardened-success?logo=security)](https://github.com/anthropics/claude-code/security)
+
+> **🤖 Built with Claude Code**: This project was developed with significant assistance from Claude Code (Anthropic). The architecture, documentation, and implementation were created through iterative collaboration with AI.
 
 ---
 
@@ -571,7 +574,7 @@ Edit `.devcontainer/devcontainer.json`:
 
 **Modify Playwright service:**
 
-Edit `.devcontainer/playwright/Dockerfile` or `.devcontainer/playwright/playwright-server.js` to customize browser automation behavior.
+Edit `.devcontainer/services/playwright/Dockerfile` or `.devcontainer/services/playwright/playwright-server.js` to customize browser automation behavior.
 
 ### First Commit Checklist
 
@@ -1571,9 +1574,21 @@ Found a bug? Have a suggestion?
 
 This repository exists primarily to showcase and enable **Claude Code integration in Docker environments**.
 
-Special thanks to:
+### Development Attribution
 
-- **Anthropic** - For creating Claude Code, the AI-powered coding assistant that is the centerpiece of this repository
+**This project was developed with significant support from Claude Code (Anthropic):**
+
+- 🤖 Architecture design and implementation guidance
+- 📝 Comprehensive documentation generation
+- 🔧 Configuration optimization and troubleshooting
+- 🔒 Security hardening recommendations
+- 📚 Code examples and best practices
+
+**The multi-container architecture, config-driven service management, and extensive documentation were created through iterative collaboration with Claude Code.**
+
+### Special Thanks
+
+- **Anthropic** - For creating Claude Code, the AI-powered coding assistant that is the centerpiece of this repository and made this project possible
 - **Microsoft** - For DevContainers and VS Code, which make this integration seamless
 - **Playwright Team** - For browser automation capabilities that complement Claude Code
 - **Docker** - For containerization technology that makes this environment reproducible
