@@ -1,185 +1,142 @@
 #!/bin/bash
-################################################################################
-# DEVCONTAINER PROFILE INITIALIZATION SCRIPT
-################################################################################
+# ============================================================================
+# INIT-PROFILES.SH - Service Profile Initialization
+# ============================================================================
 # This script runs BEFORE docker-compose to configure which services to start
 #
 # How it works:
-# 1. Reads .env file for ENABLE_* flags
-# 2. Converts to PROFILE_* variables for docker-compose
-# 3. Generates .env.profiles file
-# 4. Docker Compose reads .env.profiles to activate services
+# 1. Reads .devcontainer/.env (user configuration)
+# 2. Converts ENABLE_* flags to PROFILE variables
+# 3. Writes .devcontainer/.env.profiles (consumed by docker-compose)
 #
-# Docker Compose Profiles:
-# - Services with matching profile name will start
-# - Services with profile "disabled" won't start
-# - Core workspace has no profile (always starts)
-################################################################################
-
-set -e  # Exit on error
-
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-print_info() {
-    echo -e "${BLUE}ℹ${NC} $1"
-}
-
-print_success() {
-    echo -e "${GREEN}✅${NC} $1"
-}
-
-print_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}❌${NC} $1"
-}
-
-# ============================================================================
-# CONFIGURATION
+# Example:
+#   ENABLE_PLAYWRIGHT=true  →  PLAYWRIGHT_PROFILE=playwright
+#   ENABLE_PLAYWRIGHT=false →  PLAYWRIGHT_PROFILE=disabled
+#
+# Docker Compose uses profiles to conditionally start services
 # ============================================================================
 
+set -e
+
+# Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$SCRIPT_DIR/.env"
-OUTPUT_FILE="$SCRIPT_DIR/.env.profiles"
+PROFILES_FILE="$SCRIPT_DIR/.env.profiles"
 
-print_info "Initializing DevContainer service profiles..."
+echo "============================================================================"
+echo "Initializing DevContainer Service Profiles"
+echo "============================================================================"
 
 # ============================================================================
-# VALIDATE .ENV FILE EXISTS
+# Create default .env if it doesn't exist
 # ============================================================================
-
 if [ ! -f "$ENV_FILE" ]; then
-    print_error ".env file not found at: $ENV_FILE"
-    print_warning "Creating default .env from .env.example..."
-
-    if [ -f "$SCRIPT_DIR/.env.example" ]; then
-        cp "$SCRIPT_DIR/.env.example" "$ENV_FILE"
-        print_success "Created .env from .env.example"
-    else
-        print_error ".env.example not found. Cannot proceed."
-        exit 1
-    fi
-fi
-
+    echo "Creating default .env configuration..."
+    cat > "$ENV_FILE" << 'EOF'
 # ============================================================================
-# LOAD ENVIRONMENT VARIABLES
+# DEVCONTAINER SERVICE CONFIGURATION
 # ============================================================================
-
-# Load .env file and export variables
-# Use export approach instead of source for better compatibility
-set -a  # Automatically export all variables
-while IFS='=' read -r key value; do
-    # Skip comments and empty lines
-    [[ "$key" =~ ^#.*$ ]] && continue
-    [[ -z "$key" ]] && continue
-    # Remove surrounding quotes if present
-    value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")
-    # Export the variable
-    export "$key=$value"
-done < <(grep -v '^[[:space:]]*#' "$ENV_FILE" | grep -v '^[[:space:]]*$')
-set +a
-
-# ============================================================================
-# CONVERT ENABLE_* FLAGS TO PROFILE_* VARIABLES
-# ============================================================================
-
-# Playwright Service
-if [[ "${ENABLE_PLAYWRIGHT}" == "true" ]]; then
-    PLAYWRIGHT_PROFILE="playwright"
-    print_success "Playwright service: ENABLED"
-else
-    PLAYWRIGHT_PROFILE="disabled"
-    print_info "Playwright service: disabled"
-fi
-
-# FastAPI Service
-if [[ "${ENABLE_FASTAPI}" == "true" ]]; then
-    FASTAPI_PROFILE="fastapi"
-    print_success "FastAPI service: ENABLED"
-else
-    FASTAPI_PROFILE="disabled"
-    print_info "FastAPI service: disabled"
-fi
-
-# MCP Service
-if [[ "${ENABLE_MCP}" == "true" ]]; then
-    MCP_PROFILE="mcp"
-    print_success "MCP service: ENABLED"
-else
-    MCP_PROFILE="disabled"
-    print_info "MCP service: disabled"
-fi
-
-# ============================================================================
-# GENERATE .ENV.PROFILES FILE
-# ============================================================================
-
-cat > "$OUTPUT_FILE" << EOF
-# ============================================================================
-# AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
-# ============================================================================
-# Generated by: init-profiles.sh
-# Generated at: $(date)
-# Source: .env
+# This file controls which optional services are enabled
 #
-# This file is used by docker-compose.yml to determine which services to start
-# Docker Compose profiles feature requires docker-compose v1.28+
-# ============================================================================
-
-# Service Profiles
-PLAYWRIGHT_PROFILE=${PLAYWRIGHT_PROFILE}
-FASTAPI_PROFILE=${FASTAPI_PROFILE}
-MCP_PROFILE=${MCP_PROFILE}
-
-# Port Configuration
-PLAYWRIGHT_PORT=${PLAYWRIGHT_PORT:-3000}
-FASTAPI_PORT=${FASTAPI_PORT:-8000}
-MCP_PORT=${MCP_PORT:-8080}
-
-# ============================================================================
-# HOW THIS WORKS
-# ============================================================================
-# In docker-compose.yml, services define:
-#   profiles: ["\${PLAYWRIGHT_PROFILE:-disabled}"]
+# How to use:
+# 1. Set ENABLE_SERVICENAME=true to enable a service
+# 2. Set ENABLE_SERVICENAME=false to disable a service
+# 3. Rebuild the DevContainer (Cmd+Shift+P → "Rebuild Container")
 #
-# If PLAYWRIGHT_PROFILE=playwright → service starts
-# If PLAYWRIGHT_PROFILE=disabled → service is ignored
+# Changes take effect after container rebuild
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Playwright Service - Browser Automation
+# ----------------------------------------------------------------------------
+# Runs Chromium browser with HTTP API for automated testing
+# Resources: ~1-2GB RAM, 1-2 CPUs
+# Port: 3000 (internal network only)
+# Enable if you need browser automation
+# ----------------------------------------------------------------------------
+ENABLE_PLAYWRIGHT=true
+
+# ----------------------------------------------------------------------------
+# Future Services (Not Yet Implemented)
+# ----------------------------------------------------------------------------
+# ENABLE_FASTAPI=false
+# ENABLE_MCP=false
 # ============================================================================
 EOF
-
-print_success "Generated: $OUTPUT_FILE"
-
-# ============================================================================
-# SUMMARY
-# ============================================================================
-
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-print_info "Service Configuration Summary"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-echo "  Core Workspace:  ALWAYS ENABLED"
-echo "  Playwright:      $([ "$PLAYWRIGHT_PROFILE" = "playwright" ] && echo "✅ ENABLED" || echo "⏭️  DISABLED")"
-echo "  FastAPI:         $([ "$FASTAPI_PROFILE" = "fastapi" ] && echo "✅ ENABLED" || echo "⏭️  DISABLED")"
-echo "  MCP:             $([ "$MCP_PROFILE" = "mcp" ] && echo "✅ ENABLED" || echo "⏭️  DISABLED")"
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-
-# ============================================================================
-# VALIDATION
-# ============================================================================
-
-# Check if docker-compose is available
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-    print_warning "docker-compose not found. Make sure Docker is installed."
+    echo "✓ Created default .env with ENABLE_PLAYWRIGHT=true"
 fi
 
-print_success "Profile initialization complete!"
+# ============================================================================
+# Load configuration from .env
+# ============================================================================
+echo ""
+echo "Loading configuration from: $ENV_FILE"
+
+# Source the .env file to load variables
+if [ -f "$ENV_FILE" ]; then
+    # Export all variables from .env
+    set -a
+    source "$ENV_FILE"
+    set +a
+else
+    echo "ERROR: .env file not found at $ENV_FILE"
+    exit 1
+fi
+
+# ============================================================================
+# Convert ENABLE_* flags to PROFILE variables
+# ============================================================================
+echo ""
+echo "Converting service flags to Docker Compose profiles:"
+
+# Initialize profiles file
+cat > "$PROFILES_FILE" << 'EOF'
+# ============================================================================
+# AUTO-GENERATED - DO NOT EDIT MANUALLY
+# ============================================================================
+# This file is automatically generated by init-profiles.sh
+# Edit .devcontainer/.env to change service configuration
+# ============================================================================
+
+EOF
+
+# ----------------------------------------------------------------------------
+# Playwright Service Profile
+# ----------------------------------------------------------------------------
+if [ "${ENABLE_PLAYWRIGHT:-false}" = "true" ]; then
+    echo "  ✓ Playwright: ENABLED (PLAYWRIGHT_PROFILE=playwright)"
+    echo "PLAYWRIGHT_PROFILE=playwright" >> "$PROFILES_FILE"
+else
+    echo "  ✗ Playwright: DISABLED (PLAYWRIGHT_PROFILE=disabled)"
+    echo "PLAYWRIGHT_PROFILE=disabled" >> "$PROFILES_FILE"
+fi
+
+# ----------------------------------------------------------------------------
+# Future Services
+# ----------------------------------------------------------------------------
+# Add similar blocks for future services:
+# if [ "${ENABLE_FASTAPI:-false}" = "true" ]; then
+#     echo "FASTAPI_PROFILE=fastapi" >> "$PROFILES_FILE"
+# else
+#     echo "FASTAPI_PROFILE=disabled" >> "$PROFILES_FILE"
+# fi
+
+# ============================================================================
+# Summary
+# ============================================================================
+echo ""
+echo "============================================================================"
+echo "Profile Configuration Complete"
+echo "============================================================================"
+echo "Generated: $PROFILES_FILE"
+echo ""
+echo "Services that will start:"
+echo "  • workspace (always enabled)"
+if [ "${ENABLE_PLAYWRIGHT:-false}" = "true" ]; then
+    echo "  • playwright (browser automation)"
+fi
+echo ""
+echo "To change configuration:"
+echo "  1. Edit $ENV_FILE"
+echo "  2. Rebuild container (Cmd+Shift+P → 'Rebuild Container')"
+echo "============================================================================"

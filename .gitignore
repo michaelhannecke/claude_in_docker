@@ -18,3 +18,10 @@ wheels/
 # DevContainer generated files
 .devcontainer/.env.profiles
 .devcontainer/state-*.txt
+
+# Claude Code local settings (user-specific permissions)
+.claude/settings.local.json
+.devcontainer/.claude/
+
+# Local images/assets (if not part of documentation)
+bluetuple-ai.png
