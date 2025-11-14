@@ -1,3 +1,18 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose:*)",
+      "Bash(cat:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker images:*)",
+      "Bash(docker inspect:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)"
+    ]
+  },
   "enableAllProjectMcpServers": false
 }
